@@ -35,8 +35,6 @@ AC_ARG_ENABLE([debug],
     [  --enable-debug          build with additional debugging code],
     [CFLAGS='-g -DDEBUG'])
 
-LT_INIT
-
 AM_CONDITIONAL(DEBUG, test x"$debug" = x"true")
 
 # Add a option to force static link the target.
