@@ -14,12 +14,8 @@ int shadowvpn_decrypt(unsigned char *m, unsigned char *c,
 /*
    MAC IV1 (IV2 NONCE CIPHER_TEXT)
 */
-#define SHADOWVPN_KEY_LEN crypto_stream_salsa20_KEYBYTES
-#define SHADOWVPN_NONCE_LEN crypto_stream_salsa20_NONCEBYTES
-#define SHADOWVPN_MAC_LEN crypto_onetimeauth_BYTES
-#define SHADOWVPN_IV1_LEN 16
-#define SHADOWVPN_IV2_LEN 8
-#define SHADOWVPN_OVERHEAD_LEN (SHADOWVPN_NONCE_LEN + SHADOWVPN_MAC_LEN + \
-                                SHADOWVPN_IV1_LEN + SHADOWVPN_IV2_LEN)
-
+#define SHADOWVPN_KEY_LEN 32
+#define SHADOWVPN_ZERO_BYTES 32
+#define SHADOWVPN_OVERHEAD_LEN 24
+#define SHADOWVPN_PACKET_OFFSET 8
 #endif
