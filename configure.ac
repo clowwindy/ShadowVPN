@@ -1,8 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.67])
-AC_INIT([shadowvpn], [1.1.6], [clowwindy42@gmail.com])
+AC_PREREQ([2.69])
+AC_INIT([shadowvpn],[1.0.0],[clowwindy42@gmail.com])
 AC_CONFIG_AUX_DIR([.])
 
 AC_CONFIG_SRCDIR([src/main.c])
@@ -12,8 +12,10 @@ AM_INIT_AUTOMAKE([foreign -Wall])
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_RANLIB
 AC_PROG_INSTALL
-AC_PROG_LIBTOOL
+LT_INIT
 
 # Checks for header files.
 AC_HEADER_RESOLV
