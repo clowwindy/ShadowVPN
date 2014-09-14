@@ -1,12 +1,21 @@
+#ifndef LOG_H
+#define LOG_H
+
+#include <time.h>
+#include "config.h"
+
+extern int verbose_mode;
+
 #define __LOG(o, t, v, s...) do {                                   \
   time_t now;                                                       \
   time(&now);                                                       \
   char *time_str = ctime(&now);                                     \
   time_str[strlen(time_str) - 1] = '\0';                            \
   if (t == 0) {                                                     \
-    if (stdout != o || verbose) {                                   \
+    if (stdout != o || verbose_mode) {                              \
       fprintf(o, "%s ", time_str);                                  \
       fprintf(o, s);                                                \
+      fprintf(o, "\n");                                             \
       fflush(o);                                                    \
     }                                                               \
   } else if (t == 1) {                                              \
@@ -15,12 +24,14 @@
   }                                                                 \
 } while (0)
 
-#define LOG(s...) __LOG(stdout, 0, "_", s)
-#define ERR(s) __LOG(stderr, 1, s, "_")
-#define VERR(s...) __LOG(stderr, 0, "_", s)
+#define logf(s...) __LOG(stdout, 0, "_", s)
+#define err(s) __LOG(stderr, 1, s, "_")
+#define errf(s...) __LOG(stderr, 0, "_", s)
 
 #ifdef DEBUG
-#define DLOG(s...) LOG(s)
+#define debugf(s...) logf(s)
 #else
-#define DLOG(s...)
+#define debugf(s...)
+#endif
+
 #endif

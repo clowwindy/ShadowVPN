@@ -10,11 +10,11 @@ static shadowvpn_args_t args;
 int main(int argc, char **argv) {
   // parse args
   if (0 != args_parse(&args, argc, argv)) {
-    perror("can not parse args");
+    errf("error when parsing args");
     return EXIT_FAILURE;
   }
   if (0 != crypto_init()) {
-    perror("shadowvpn_crypto_init");
+    errf("shadowvpn_crypto_init");
     return EXIT_FAILURE;
   }
 
