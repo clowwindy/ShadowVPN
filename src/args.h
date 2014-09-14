@@ -20,6 +20,7 @@ typedef struct {
   shadowvpn_cmd cmd;
   const char *conf_file;
   const char *pid_file;
+  const char *log_file;
   const char *intf;
   const char *password;
   const char *server;

@@ -15,19 +15,19 @@ static const char *help_message =
 "\n"
 "Online help: <https://github.com/clowwindy/ShadowVPN>\n";
 
-void print_help() __attribute__ ((noreturn));
+static void print_help() __attribute__ ((noreturn));
 
-void load_default_args(shadowvpn_args_t *args);
+static void load_default_args(shadowvpn_args_t *args);
 
-int process_key_value(shadowvpn_args_t *args, const char *key,
+static int process_key_value(shadowvpn_args_t *args, const char *key,
                       const char *value);
 
-void print_help() {
+static void print_help() {
   printf("%s", help_message);
   exit(1);
 }
 
-int parse_config_file(shadowvpn_args_t *args, const char *filename) {
+static int parse_config_file(shadowvpn_args_t *args, const char *filename) {
   char buf[512];
   char *line;
   FILE *fp;
@@ -86,7 +86,7 @@ int parse_config_file(shadowvpn_args_t *args, const char *filename) {
   return 0;
 }
 
-int process_key_value(shadowvpn_args_t *args, const char *key,
+static int process_key_value(shadowvpn_args_t *args, const char *key,
                       const char *value) {
   if (strcmp("server", key) == 0) {
     args->server = strdup(value);
@@ -120,6 +120,8 @@ int process_key_value(shadowvpn_args_t *args, const char *key,
     args->intf = strdup(value);
   } else if (strcmp("pidfile", key) == 0) {
     args->pid_file = strdup(value);
+  } else if (strcmp("logfile", key) == 0) {
+    args->log_file = strdup(value);
   } else if (strcmp("up", key) == 0) {
     args->up_script = strdup(value);
   } else if (strcmp("down", key) == 0) {
@@ -130,10 +132,11 @@ int process_key_value(shadowvpn_args_t *args, const char *key,
   return 0;
 }
 
-void load_default_args(shadowvpn_args_t *args) {
-  args->pid_file = "/var/run/shadowvpn.pid";
+static void load_default_args(shadowvpn_args_t *args) {
   args->intf = "tun0";
   args->mtu = 1500;
+  args->pid_file = "/var/run/shadowvpn.pid";
+  args->log_file = "/var/log/shadowvpn.log";
 }
 
 int args_parse(shadowvpn_args_t *args, int argc, char **argv) {
