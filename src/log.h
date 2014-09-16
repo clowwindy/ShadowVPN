@@ -2,6 +2,8 @@
 #define LOG_H
 
 #include <time.h>
+#include <string.h>
+#include <stdio.h>
 #include "config.h"
 
 extern int verbose_mode;

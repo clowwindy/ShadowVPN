@@ -4,5 +4,6 @@
 #include "log.h"
 #include "crypto.h"
 #include "args.h"
+#include "daemon.h"
 
 #endif
