@@ -21,6 +21,8 @@ LT_INIT
 AC_HEADER_RESOLV
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h stdlib.h string.h sys/socket.h unistd.h])
 
+AC_CHECK_HEADER([linux/if_tun.h],[],[AC_MSG_ERROR([linux/if_tun.h not found.])],[])
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
