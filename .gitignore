@@ -24,7 +24,7 @@ autom4te.cache
 build
 compile
 confdefs.h
-config.h
+config.*
 configure
 depcomp
 android-toolchain
