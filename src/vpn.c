@@ -159,6 +159,8 @@ int run_vpn(shadowvpn_args_t *args) {
 
   tun_buf = malloc(args->mtu + SHADOWVPN_ZERO_BYTES);
   udp_buf = malloc(args->mtu + SHADOWVPN_ZERO_BYTES);
+  memset(tun_buf, 0, SHADOWVPN_ZERO_BYTES);
+  memset(udp_buf, 0, SHADOWVPN_ZERO_BYTES);
 
   for(;;) {
     FD_ZERO(&readset);
@@ -172,9 +174,8 @@ int run_vpn(shadowvpn_args_t *args) {
       close(sock);
       return -1;
     }
-
     if (FD_ISSET(tun, &readset)) {
-      r = read(tun, tun_buf + SHADOWVPN_OVERHEAD_LEN, args->mtu); 
+      r = read(tun, tun_buf + SHADOWVPN_ZERO_BYTES, args->mtu); 
       if (r == -1) {
         // TODO
         err("read from tun");
@@ -182,6 +183,9 @@ int run_vpn(shadowvpn_args_t *args) {
       }
       if (remote_addrlen) {
         crypto_encrypt(udp_buf, tun_buf, r);
+        if (-1 == crypto_decrypt(tun_buf, udp_buf, r)) {
+          errf("invalid packet, drop");
+        }
         r = sendto(sock, udp_buf + SHADOWVPN_PACKET_OFFSET,
                    SHADOWVPN_OVERHEAD_LEN + r, 0,
                    remote_addrp, remote_addrlen);
@@ -201,10 +205,11 @@ int run_vpn(shadowvpn_args_t *args) {
         // TODO rebuild socket
         break;
       }
-      if (-1 == crypto_decrypt(tun_buf, udp_buf, r)) {
+
+      if (-1 == crypto_decrypt(tun_buf, udp_buf, r - SHADOWVPN_OVERHEAD_LEN)) {
         errf("invalid packet, drop");
       } else {
-        if (-1 == write(tun, tun_buf + SHADOWVPN_OVERHEAD_LEN,
+        if (-1 == write(tun, tun_buf + SHADOWVPN_ZERO_BYTES,
               r - SHADOWVPN_OVERHEAD_LEN)) {
           err("write to tun");
           break;
