@@ -35,14 +35,18 @@ AC_CHECK_FUNCS([inet_ntoa memset select socket strchr strdup strrchr])
 
 AC_ARG_ENABLE([debug],
     [  --enable-debug          build with additional debugging code],
-    [CFLAGS='-g -DDEBUG'])
+    [CFLAGS="$CFLAGS -g -DDEBUG"])
 
 AM_CONDITIONAL(DEBUG, test x"$debug" = x"true")
 
 # Add a option to force static link the target.
 AC_ARG_ENABLE([static],
     [  --enable-static         build with static linking],
-    [LDFLAGS='-static'])
+    [LDFLAGS="$LDFLAGS -static"])
+
+AC_ARG_ENABLE([profile],
+    [  --enable-profile        build with profile],
+    [CFLAGS="$CFLAGS -pg"])
 
 AM_CONDITIONAL(STATIC, test x"$static" = x"true")
 
