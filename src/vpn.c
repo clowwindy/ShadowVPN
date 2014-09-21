@@ -96,11 +96,6 @@ static int udp_alloc(int if_bind, const char *host, int port,
     errf("unknown ai_family %d", res->ai_family);
     return -1;
   }
-  if (res->ai_addrlen > *addrlen) {
-    // almost not possible
-    errf("res->addrlen is too long");
-    return -1;
-  }
   memcpy(addr, res->ai_addr, res->ai_addrlen); 
   *addrlen = res->ai_addrlen;
 
