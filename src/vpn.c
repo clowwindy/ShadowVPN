@@ -183,9 +183,6 @@ int run_vpn(shadowvpn_args_t *args) {
       }
       if (remote_addrlen) {
         crypto_encrypt(udp_buf, tun_buf, r);
-        if (-1 == crypto_decrypt(tun_buf, udp_buf, r)) {
-          errf("invalid packet, drop");
-        }
         r = sendto(sock, udp_buf + SHADOWVPN_PACKET_OFFSET,
                    SHADOWVPN_OVERHEAD_LEN + r, 0,
                    remote_addrp, remote_addrlen);

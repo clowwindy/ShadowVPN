@@ -26,7 +26,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include "shadowvpn.h"
+
+void sig_handler(int signo) {
+  exit(0);
+}
 
 int main(int argc, char **argv) {
   shadowvpn_args_t args;
@@ -67,6 +72,8 @@ int main(int argc, char **argv) {
     errf("can not set password");
     return EXIT_FAILURE;
   }
+
+  signal(SIGINT, sig_handler);
 
   return run_vpn(&args);;
 }
