@@ -23,16 +23,18 @@
 
 */
 
+#include <sys/types.h>
+#include <sys/select.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <sys/ioctl.h>
-#include <net/if.h>
-#include <sys/select.h>
-#include <sys/types.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <net/if.h>
 #include <linux/if_tun.h>
 #include "shadowvpn.h"
 
@@ -99,7 +101,7 @@ static int udp_alloc(int if_bind, const char *host, int port,
     errf("res->addrlen is too long");
     return -1;
   }
-  memcpy(addr, res, res->ai_addrlen); 
+  memcpy(addr, res->ai_addr, res->ai_addrlen); 
   *addrlen = res->ai_addrlen;
 
   if (-1 == (sock = socket(res->ai_family, SOCK_DGRAM, IPPROTO_UDP))) {
