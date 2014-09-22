@@ -15,14 +15,14 @@ script:
 
 env:
   global:
-    - secure: "aiYevMw0lXG2RcjsqQ5WaBSoik13QSjt24lKZJrjcVLQpW63G+xkOyDj3INCBtSfHYH6su9/HU0XUkFcjFkhZmBgHjOjJjcau4Ksw6CgyhjdqK3qIAQsW/g8/PybXUQlP6LYUBcUZPwjjvHCuO+9rJQ+fwUqbIdSxy1eyZM0TeY="
+   - secure: "J9+jkZd+amNS081WEtKID6wuDNnN+5W7+RLM26GrGCG2F+EexVKR85wozXlWsMAr9E99xV7XMXTPeuACDTPG3sTD32x5irWy40qIJ2gDmC2GiHpuOTT5yhdliFo14iMjpV9IW3xxe+Qe8dQAS1QWP1mUKd+V4kXyFmXpS2lzDZg="
 
 addons:
   coverity_scan:
     project:
       name: "clowwindy/ShadowVPN"
       description: "ShadowVPN"
-      notification_email: clowwindy42@gmail.com
-      build_command_prepend: "git submodule init; git submodule update; ./autogen.sh ; ./configure"
-      build_command: "make -j4"
-      branch_pattern: coverity_scan
+    notification_email: clowwindy42@gmail.com
+    build_command_prepend: "git submodule init; git submodule update; ./autogen.sh ; ./configure"
+    build_command: "make -j4"
+    branch_pattern: coverity_scan
