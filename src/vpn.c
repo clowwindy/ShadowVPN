@@ -109,7 +109,7 @@ static int udp_alloc(int if_bind, const char *host, int port,
   if (if_bind) {
     if (0 != bind(sock, res->ai_addr, res->ai_addrlen)) {
       err("bind");
-      errf("can not bind %s:%d", addr, port);
+      errf("can not bind %s:%d", host, port);
       return -1; 
     }
     freeaddrinfo(res);
