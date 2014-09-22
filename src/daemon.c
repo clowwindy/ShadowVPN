@@ -126,6 +126,10 @@ int daemon_stop(const shadowvpn_args_t *args) {
   }
   char *line = fgets(buf, PID_BUF_SIZE, fp);
   fclose(fp);
+  if (line == NULL) {
+    err("fgets");
+    return -1;
+  }
   pid_t pid = (pid_t)atol(buf);
   if (pid > 0) {
     // make sure pid is not zero or negative
