@@ -10,8 +10,8 @@ before_script:
  - ./autogen.sh
 
 script:
- - ./configure
- - make
+ - ./configure && make
+ - make clean && scan-build ./configure && scan-build make
 
 env:
   global:

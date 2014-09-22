@@ -48,6 +48,10 @@ AC_ARG_ENABLE([profile],
     [  --enable-profile        build with profile],
     [CFLAGS="$CFLAGS -pg"])
 
+AC_ARG_ENABLE([analyze],
+    [  --enable-analyze        build with analyze],
+    [CC="clang --analyze"])
+
 AM_CONDITIONAL(STATIC, test x"$static" = x"true")
 
 AC_CONFIG_FILES([Makefile src/Makefile])

@@ -38,6 +38,7 @@ m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
 src/shadowvpn
+src/crypto-perf
 missing
 stamp-h1
 tags
