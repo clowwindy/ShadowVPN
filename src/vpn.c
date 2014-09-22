@@ -175,9 +175,7 @@ int run_vpn(shadowvpn_args_t *args) {
       if (errno == EINTR)
         continue;
       err("select");
-      close(tun);
-      close(sock);
-      return -1;
+      break;
     }
     if (FD_ISSET(tun, &readset)) {
       r = read(tun, tun_buf + SHADOWVPN_ZERO_BYTES, args->mtu); 
