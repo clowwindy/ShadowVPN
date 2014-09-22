@@ -27,6 +27,7 @@
 #include <sys/select.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -171,6 +172,8 @@ int run_vpn(shadowvpn_args_t *args) {
     max_fd = max(tun, sock) + 1;
 
     if (-1 == select(max_fd, &readset, NULL, NULL, NULL)) {
+      if (errno == EINTR)
+        continue;
       err("select");
       close(tun);
       close(sock);
