@@ -1,0 +1,23 @@
+language: c
+
+compiler:
+ - clang
+ - gcc
+
+before_script:
+ - git submodule init
+ - git submodule update
+ - ./autogen.sh
+
+script:
+ - ./configure
+
+addons:
+  coverity_scan:
+    project:
+      name: "clowwindy/ShadowVPN"
+      description: "ShadowVPN"
+      notification_email: coverityscan@pureftpd.org
+      build_command_prepend: "git submodule init; git submodule update; ./autogen.sh ; ./configure"
+      build_command: "make -j4"
+      branch_pattern: coverity_scan
