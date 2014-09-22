@@ -1,5 +1,5 @@
 /**
-  shadowvpn.h
+  shell.c
 
   Copyright (c) 2014 clowwindy
 
@@ -23,14 +23,46 @@
 
 */
 
-#ifndef SHADOWVPN_H
-#define SHADOWVPN_H
-
-#include "log.h"
-#include "crypto.h"
-#include "args.h"
-#include "daemon.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include "shadowvpn.h"
 #include "shell.h"
-#include "vpn.h"
 
-#endif
+static int shell_run(shadowvpn_args_t *args, int is_up);
+
+int shell_up(shadowvpn_args_t *args) {
+  return shell_run(args, 1);
+}
+
+int shell_down(shadowvpn_args_t *args) {
+  return shell_run(args, 0);
+}
+
+static int shell_run(shadowvpn_args_t *args, int is_up) {
+  char buf[1024];
+  const char *mode, *script;
+  int r;
+  if (args->mode == SHADOWVPN_MODE_SERVER) {
+    mode = "server";
+  } else {
+    mode = "client";
+  }
+  if (is_up) {
+    script = args->up_script;
+  } else {
+    script = args->down_script;
+  }
+  r = snprintf(buf, sizeof(buf), "\"%s\" %s \"%s\" %d", script, mode,
+               args->intf, args->mtu);
+  if (r > sizeof(buf) - 1) {
+    errf("script path too long");
+    return -1;
+  }
+  if (0 != (r = system(buf))) {
+    errf("script %s returned non-zero return code: %d", script, r);
+    return -1;
+  }
+  return 0;
+}
+
+

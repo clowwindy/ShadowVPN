@@ -1,5 +1,5 @@
 /**
-  shadowvpn.h
+  shell.h
 
   Copyright (c) 2014 clowwindy
 
@@ -23,14 +23,13 @@
 
 */
 
-#ifndef SHADOWVPN_H
-#define SHADOWVPN_H
+#ifndef SHELL_H
+#define SHELL_H
 
-#include "log.h"
-#include "crypto.h"
 #include "args.h"
-#include "daemon.h"
-#include "shell.h"
-#include "vpn.h"
+
+int shell_up(shadowvpn_args_t *args);
+int shell_down(shadowvpn_args_t *args);
 
 #endif
+

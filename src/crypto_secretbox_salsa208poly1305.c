@@ -1,5 +1,5 @@
 /**
-  vpn.c
+  crypto_secretbox_salsa208poly1305.c
 
   Copyright (c) 2014 clowwindy
 

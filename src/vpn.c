@@ -157,6 +157,8 @@ int run_vpn(shadowvpn_args_t *args) {
     return -1;
   }
 
+  shell_up(args);
+
   tun_buf = malloc(args->mtu + SHADOWVPN_ZERO_BYTES);
   udp_buf = malloc(args->mtu + SHADOWVPN_ZERO_BYTES);
   memset(tun_buf, 0, SHADOWVPN_ZERO_BYTES);
@@ -216,6 +218,9 @@ int run_vpn(shadowvpn_args_t *args) {
   }
   free(tun_buf);
   free(udp_buf);
+
+  shell_down(args);
+
   close(tun);
   close(sock);
   return -1;

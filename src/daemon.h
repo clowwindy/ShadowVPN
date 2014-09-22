@@ -1,5 +1,5 @@
 /**
-  vpn.c
+  daemon.h
 
   Copyright (c) 2014 clowwindy
 

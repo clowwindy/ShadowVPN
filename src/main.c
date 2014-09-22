@@ -1,5 +1,5 @@
 /**
-  vpn.c
+  main.c
 
   Copyright (c) 2014 clowwindy
 

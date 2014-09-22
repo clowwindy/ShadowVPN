@@ -1,5 +1,5 @@
 /**
-  vpn.c
+  deamon.c
 
   Copyright (c) 2014 clowwindy
 
