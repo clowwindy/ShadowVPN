@@ -90,9 +90,9 @@ static int udp_alloc(int if_bind, const char *host, int port,
   }
 
   if (res->ai_family == AF_INET)
-    ((struct sockaddr_in *)res->ai_addr)->sin_port = port;
+    ((struct sockaddr_in *)res->ai_addr)->sin_port = htons(port);
   else if (res->ai_family == AF_INET6)
-    ((struct sockaddr_in6 *)res->ai_addr)->sin6_port = port;
+    ((struct sockaddr_in6 *)res->ai_addr)->sin6_port = htons(port);
   else {
     errf("unknown ai_family %d", res->ai_family);
     return -1;
