@@ -12,6 +12,12 @@ before_script:
 script:
  - ./configure
 
+env:
+  global:
+    # COVERITY_SCAN_TOKEN
+    # ** specific to your project **
+    - secure: "DLvxrm6SPvrnQTrtOyMH3g"
+
 addons:
   coverity_scan:
     project:
