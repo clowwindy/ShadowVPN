@@ -17,12 +17,3 @@ env:
   global:
    - secure: "e1gTMxjeb31lbNlntCqKuc0UhXefSElcZOnAECOfm92IprOfOA8jRwlu/opXtpHJohldqag1Ujj0mzq7fy3F7vd8cLJxHVqb8x8g1l3HDa+hrydKzxkgku/V3t/ISFHdjI0L/RCNvdjUIFmVkuYTzETl/jl7RbYXMNPSdsZ8NzU="
 
-addons:
-  coverity_scan:
-    project:
-      name: "clowwindy/ShadowVPN"
-      description: "ShadowVPN"
-    notification_email: clowwindy42@gmail.com
-    build_command_prepend: "git submodule init; git submodule update; ./autogen.sh ; ./configure"
-    build_command: "make -j4"
-    branch_pattern: coverity_scan
