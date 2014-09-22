@@ -15,9 +15,7 @@ script:
 
 env:
   global:
-    # COVERITY_SCAN_TOKEN
-    # ** specific to your project **
-    - secure: "DLvxrm6SPvrnQTrtOyMH3g"
+    - secure: "aiYevMw0lXG2RcjsqQ5WaBSoik13QSjt24lKZJrjcVLQpW63G+xkOyDj3INCBtSfHYH6su9/HU0XUkFcjFkhZmBgHjOjJjcau4Ksw6CgyhjdqK3qIAQsW/g8/PybXUQlP6LYUBcUZPwjjvHCuO+9rJQ+fwUqbIdSxy1eyZM0TeY="
 
 addons:
   coverity_scan:
