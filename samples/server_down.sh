@@ -16,7 +16,7 @@ iptables -D FORWARD -i eth0 -o $intf -m state --state RELATED,ESTABLISHED -j ACC
 iptables -D FORWARD -i $intf -o eth0 -j ACCEPT
 
 # turn off MSS fix
-declare -i mss
-mss=$mth-40
-iptables -t mangle -D FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1400
+# MSS = MTU - TCP header - IP header
+mss=$(($mtu - 40))
+iptables -t mangle -D FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss $mss
 

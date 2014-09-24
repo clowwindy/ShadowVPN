@@ -19,9 +19,8 @@ iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 iptables -A FORWARD -i eth0 -o $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -i $intf -o eth0 -j ACCEPT
 
-# MSS = MTU - TCP header - IP header
 # turn on MSS fix
-declare -i mss
-mss=$mth-40
-iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1400
+# MSS = MTU - TCP header - IP header
+mss=$(($mtu - 40))
+iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss $mss
 
