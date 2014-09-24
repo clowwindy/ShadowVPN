@@ -113,6 +113,14 @@ static int parse_config_file(shadowvpn_args_t *args, const char *filename) {
 
 static int process_key_value(shadowvpn_args_t *args, const char *key,
                       const char *value) {
+  if (strcmp("password", key) != 0) {
+    // set environment variables so that up/down script can
+    // make use of these values
+    if (-1 == setenv(key, value, 1)) {
+      err("setenv");
+      return -1;
+    }
+  }
   if (strcmp("server", key) == 0) {
     args->server = strdup(value);
   } else if (strcmp("port", key) == 0) {

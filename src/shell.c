@@ -39,26 +39,14 @@ int shell_down(shadowvpn_args_t *args) {
 }
 
 static int shell_run(shadowvpn_args_t *args, int is_up) {
-  char buf[1024];
-  const char *mode, *script;
+  const char *script;
   int r;
-  if (args->mode == SHADOWVPN_MODE_SERVER) {
-    mode = "server";
-  } else {
-    mode = "client";
-  }
   if (is_up) {
     script = args->up_script;
   } else {
     script = args->down_script;
   }
-  r = snprintf(buf, sizeof(buf), "\"%s\" %s \"%s\" %d", script, mode,
-               args->intf, args->mtu);
-  if (r > sizeof(buf) - 1) {
-    errf("script path too long");
-    return -1;
-  }
-  if (0 != (r = system(buf))) {
+  if (0 != (r = system(script))) {
     errf("script %s returned non-zero return code: %d", script, r);
     return -1;
   }
