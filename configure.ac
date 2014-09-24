@@ -54,6 +54,6 @@ AC_ARG_ENABLE([analyze],
 
 AM_CONDITIONAL(STATIC, test x"$static" = x"true")
 
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile samples/Makefile])
 AC_CONFIG_SUBDIRS([libsodium])
 AC_OUTPUT
