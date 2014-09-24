@@ -84,6 +84,7 @@ static int udp_alloc(int if_bind, const char *host, int port,
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_socktype = SOCK_DGRAM;
+  hints.ai_protocol = IPPROTO_UDP;
   if (0 != (r = getaddrinfo(host, NULL, &hints, &res))) {
     errf("getaddrinfo: %s", gai_strerror(r));
     return -1; 
