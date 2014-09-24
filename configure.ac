@@ -8,7 +8,7 @@ AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([config.h])
 
-AM_INIT_AUTOMAKE([foreign -Wall])
+AM_INIT_AUTOMAKE([1.11 dist-bzip2 tar-ustar foreign subdir-objects])
 
 # Checks for programs.
 AC_PROG_CC
