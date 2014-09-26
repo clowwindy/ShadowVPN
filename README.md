@@ -3,7 +3,9 @@ ShadowVPN
 
 [![Build Status]][Travis CI]
 
-ShadowVPN is a fast, safe VPN based on libsodium. Designed for OpenWRT.
+ShadowVPN is a fast, safe VPN based on libsodium. Designed for low end
+devices, i.e. OpenWRT routers.
+
 ShadowVPN is beta. Please open an issue if you found any bugs.
 
 Install
@@ -23,13 +25,13 @@ Usage
 
 Client:
 
-    sudo shadowvpn -c samples/client.conf -s start
-    sudo shadowvpn -c samples/client.conf -s stop
+    sudo shadowvpn -c /etc/shadowvpn/client.conf -s start
+    sudo shadowvpn -c /etc/shadowvpn/client.conf -s stop
 
 Server:
 
-    sudo shadowvpn -c samples/server.conf -s start
-    sudo shadowvpn -c samples/server.conf -s stop
+    sudo shadowvpn -c /etc/shadowvpn/server.conf -s start
+    sudo shadowvpn -c /etc/shadowvpn/server.conf -s stop
 
 
 [Build Status]:      https://img.shields.io/travis/clowwindy/ShadowVPN/master.svg?style=flat
