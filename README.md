@@ -13,8 +13,9 @@ Install
 
 Make sure to set `--sysconfdir=/etc`. You'll find conf files under `/etc`.
 
-    git submodule init
-    git submodule update
+    sudo apt-get install build-essential automake libtool
+    git submodule update --init
+    ./autogen.sh
     ./configure --enable-static --sysconfdir=/etc
     make && sudo make install
 
