@@ -181,9 +181,15 @@ int run_vpn(shadowvpn_args_t *args) {
     if (FD_ISSET(tun, &readset)) {
       r = read(tun, tun_buf + SHADOWVPN_ZERO_BYTES, args->mtu); 
       if (r == -1) {
-        // TODO
-        err("read from tun");
-        break;
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+          // do nothing
+        } else if (errno == EPERM || errno == EINTR) {
+          // just log, do nothing
+          err("read from tun");
+        } else {
+          err("read from tun");
+          break;
+        }
       }
       if (remote_addrlen) {
         crypto_encrypt(udp_buf, tun_buf, r);
@@ -191,9 +197,17 @@ int run_vpn(shadowvpn_args_t *args) {
                    SHADOWVPN_OVERHEAD_LEN + r, 0,
                    remote_addrp, remote_addrlen);
         if (r == -1) {
-          err("sendto");
-          // TODO rebuild socket
-          break;
+          if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            // do nothing
+          } else if (errno == ENETUNREACH || errno == ENETDOWN ||
+                     errno == EPERM || errno == EINTR || errno == EMSGSIZE) {
+            // just log, do nothing
+            err("sendto");
+          } else {
+            err("sendto");
+            // TODO rebuild socket
+            break;
+          }
         }
       }
     }
@@ -202,9 +216,17 @@ int run_vpn(shadowvpn_args_t *args) {
                    SHADOWVPN_OVERHEAD_LEN + args->mtu, 0,
                    src_addrp, src_addrlen);
       if (r == -1) {
-        err("recvfrom");
-        // TODO rebuild socket
-        break;
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+          // do nothing
+        } else if (errno == ENETUNREACH || errno == ENETDOWN ||
+                    errno == EPERM || errno == EINTR) {
+          // just log, do nothing
+          err("recvfrom");
+        } else {
+          err("recvfrom");
+          // TODO rebuild socket
+          break;
+        }
       }
 
       if (-1 == crypto_decrypt(tun_buf, udp_buf, r - SHADOWVPN_OVERHEAD_LEN)) {
@@ -212,8 +234,15 @@ int run_vpn(shadowvpn_args_t *args) {
       } else {
         if (-1 == write(tun, tun_buf + SHADOWVPN_ZERO_BYTES,
               r - SHADOWVPN_OVERHEAD_LEN)) {
-          err("write to tun");
-          break;
+          if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            // do nothing
+          } else if (errno == EPERM || errno == EINTR || errno == EINVAL) {
+            // just log, do nothing
+            err("write to tun");
+          } else {
+            err("write to tun");
+            break;
+          }
         }
       }
     }
