@@ -68,7 +68,7 @@ static int tun_alloc(const char *dev) {
 
   if((err = ioctl(fd, TUNSETIFF, (void *) &ifr)) < 0){
     err("ioctl");
-    errf("can not setup tun device");
+    errf("can not setup tun device: %s", dev);
     close(fd);
     return -1;
   }

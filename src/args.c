@@ -34,7 +34,7 @@ static const char *help_message =
 "\n"
 "  -h, --help            show this help message and exit\n"
 "  -s start/stop/restart control shadowvpn process. if omitted, will run\n"
-"                        in foreground"
+"                        in foreground\n"
 "  -c config_file        path to config file\n"
 "  -v                    verbose logging\n"
 "\n"
