@@ -29,7 +29,7 @@
 #include <signal.h>
 #include "shadowvpn.h"
 
-void sig_handler(int signo) {
+static void sig_handler(int signo) {
   exit(0);
 }
 
