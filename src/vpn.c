@@ -255,8 +255,9 @@ int run_vpn(shadowvpn_args_t *args) {
         }
       }
 
-      if (-1 == crypto_decrypt(tun_buf, udp_buf, r - SHADOWVPN_OVERHEAD_LEN)) {
-        errf("invalid packet, drop");
+      if (-1 == crypto_decrypt(tun_buf, udp_buf,
+                               r - SHADOWVPN_OVERHEAD_LEN)) {
+        errf("dropping invalid packet, maybe wrong password");
       } else {
         if (-1 == write(tun, tun_buf + SHADOWVPN_ZERO_BYTES,
               r - SHADOWVPN_OVERHEAD_LEN)) {
