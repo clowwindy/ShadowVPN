@@ -40,17 +40,21 @@ int shell_down(shadowvpn_args_t *args) {
 
 static int shell_run(shadowvpn_args_t *args, int is_up) {
   const char *script;
+  char *buf = malloc(strlen(script) + 8);
   int r;
   if (is_up) {
     script = args->up_script;
   } else {
     script = args->down_script;
   }
+  sprintf(buf, "sh %s", script);
   logf("executing %s", script);
-  if (0 != (r = system(script))) {
+  if (0 != (r = system(buf))) {
+    free(buf);
     errf("script %s returned non-zero return code: %d", script, r);
     return -1;
   }
+  free(buf);
   return 0;
 }
 
