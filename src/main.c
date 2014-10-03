@@ -30,7 +30,10 @@
 #include "shadowvpn.h"
 
 static void sig_handler(int signo) {
-  exit(0);
+  if (signo == SIGINT)
+    exit(1);  // for gprof
+  else
+    stop_vpn();
 }
 
 int main(int argc, char **argv) {
@@ -74,6 +77,7 @@ int main(int argc, char **argv) {
   }
 
   signal(SIGINT, sig_handler);
+  signal(SIGTERM, sig_handler);
 
   return run_vpn(&args);;
 }

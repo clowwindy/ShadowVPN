@@ -44,5 +44,4 @@ echo default route changed to 10.7.0.1
 # insert chnroutes rules here if you need! #
 ############################################
 
-echo done
-
+echo client_up done

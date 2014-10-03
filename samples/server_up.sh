@@ -24,3 +24,4 @@ iptables -A FORWARD -i $intf -o eth0 -j ACCEPT
 mss=$(($mtu - 40))
 iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss $mss
 
+echo $0 done

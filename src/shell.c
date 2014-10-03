@@ -46,6 +46,7 @@ static int shell_run(shadowvpn_args_t *args, int is_up) {
   } else {
     script = args->down_script;
   }
+  logf("executing %s", script);
   if (0 != (r = system(script))) {
     errf("script %s returned non-zero return code: %d", script, r);
     return -1;

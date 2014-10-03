@@ -20,3 +20,4 @@ iptables -D FORWARD -i $intf -o eth0 -j ACCEPT
 mss=$(($mtu - 40))
 iptables -t mangle -D FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss $mss
 
+echo server_down done

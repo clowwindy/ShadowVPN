@@ -27,6 +27,9 @@
 #define VPN_H
 
 #include "args.h"
+
 int run_vpn(shadowvpn_args_t *args);
+
+int stop_vpn();
 
 #endif

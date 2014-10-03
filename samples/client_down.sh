@@ -30,5 +30,4 @@ echo default route changed to $old_gw
 # remove chnroutes rules here if you need! #
 ############################################
 
-echo done
-
+echo client_down done

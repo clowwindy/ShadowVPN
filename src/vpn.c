@@ -39,6 +39,9 @@
 #include <linux/if_tun.h>
 #include "shadowvpn.h"
 
+static int running = 0;
+static int control_pipe[2];
+
 static int tun_alloc(const char *dev);
 
 static int udp_alloc(int if_bind, const char *host, int port,
@@ -141,6 +144,16 @@ int run_vpn(shadowvpn_args_t *args) {
   struct sockaddr *src_addrp = NULL;
   socklen_t *src_addrlen = NULL;
 
+  if (running) {
+    errf("can not start, already running");
+    return -1;
+  }
+
+  if (-1 == pipe(control_pipe)) {
+    err("pipe");
+    return -1;
+  }
+
   if (args->mode == SHADOWVPN_MODE_SERVER) {
     // if we are running a server, update server address from recv_from
     src_addrp = remote_addrp;
@@ -159,6 +172,8 @@ int run_vpn(shadowvpn_args_t *args) {
     return -1;
   }
 
+  running = 1;
+
   shell_up(args);
 
   tun_buf = malloc(args->mtu + SHADOWVPN_ZERO_BYTES);
@@ -166,16 +181,27 @@ int run_vpn(shadowvpn_args_t *args) {
   memset(tun_buf, 0, SHADOWVPN_ZERO_BYTES);
   memset(udp_buf, 0, SHADOWVPN_ZERO_BYTES);
 
-  for(;;) {
+  logf("VPN started");
+
+  while (running) {
     FD_ZERO(&readset);
+    FD_SET(control_pipe[0], &readset);
     FD_SET(tun, &readset);
     FD_SET(sock, &readset);
+
+    // we assume that pipe fd is always less than tun and sock fd which are
+    // created later
     max_fd = max(tun, sock) + 1;
 
     if (-1 == select(max_fd, &readset, NULL, NULL, NULL)) {
       if (errno == EINTR)
         continue;
       err("select");
+      break;
+    }
+    if (FD_ISSET(control_pipe[0], &readset)) {
+      char pipe_buf;
+      read(control_pipe[0], &pipe_buf, 1);
       break;
     }
     if (FD_ISSET(tun, &readset)) {
@@ -254,5 +280,23 @@ int run_vpn(shadowvpn_args_t *args) {
 
   close(tun);
   close(sock);
+
+  running = 0;
   return -1;
 }
+
+int stop_vpn() {
+  logf("shutting down by user");
+  if (!running) {
+    errf("can not stop, not running");
+    return -1;
+  }
+  running = 0;
+  char buf = 0;
+  if (-1 == write(control_pipe[1], &buf, 1)) {
+    err("write");
+    return -1;
+  }
+  return 0;
+}
+
