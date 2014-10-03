@@ -27,6 +27,8 @@
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include "shadowvpn.h"
 
@@ -119,6 +121,7 @@ static int write_pid_file(const char *filename, pid_t pid) {
 
 int daemon_stop(const shadowvpn_args_t *args) {
   char buf[PID_BUF_SIZE];
+  int status;
   FILE *fp = fopen(args->pid_file, "r");
   if (fp == NULL) {
     errf("not started");
@@ -137,6 +140,7 @@ int daemon_stop(const shadowvpn_args_t *args) {
       err("kill");
       return -1;
     }
+    waitpid(pid, &status, 0);
     printf("stopped\n");
     if (0 != unlink(args->pid_file)) {
       err("unlink");
