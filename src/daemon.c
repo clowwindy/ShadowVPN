@@ -36,6 +36,10 @@
 
 static int write_pid_file(const char *filename, pid_t pid);
 
+static void sig_handler_exit(int signo) {
+  exit(0);
+}
+
 int daemon_start(const shadowvpn_args_t *args) {
   pid_t pid = fork();
   if (pid == -1) {
@@ -44,16 +48,21 @@ int daemon_start(const shadowvpn_args_t *args) {
   }
   if (pid > 0) {
     // let the child print message to the console first
-    usleep(300);
+    signal(SIGINT, sig_handler_exit);
+    sleep(5);
     exit(0);
   } 
 
+  pid_t ppid = getppid();
   pid = getpid();
-  if (0 != write_pid_file(args->pid_file, pid))
+  if (0 != write_pid_file(args->pid_file, pid)) {
+    kill(ppid, SIGINT);
     return -1;
+  }
 
   // print on console
   printf("started\n");
+  kill(ppid, SIGINT);
 
   // then rediret stdout & stderr
   fclose(stdin);
