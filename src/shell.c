@@ -40,13 +40,14 @@ int shell_down(shadowvpn_args_t *args) {
 
 static int shell_run(shadowvpn_args_t *args, int is_up) {
   const char *script;
-  char *buf = malloc(strlen(script) + 8);
+  char *buf;
   int r;
   if (is_up) {
     script = args->up_script;
   } else {
     script = args->down_script;
   }
+  buf = malloc(strlen(script) + 8);
   sprintf(buf, "sh %s", script);
   logf("executing %s", script);
   if (0 != (r = system(buf))) {
