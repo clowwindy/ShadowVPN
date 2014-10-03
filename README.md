@@ -31,6 +31,7 @@ cd into [SDK] root, then
     make menuconfig # select Network/ShadowVPN
     make V=s
     scp bin/xxx/ShadowVPN-xxx-xxx.ipk root@192.168.1.1
+    # then log in your box and use opkg to install that ipk file
 
 Configuration
 -------------
