@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # example client up script
 # will be executed when client is up

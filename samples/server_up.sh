@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # example server up script
 # will be executed when server is up

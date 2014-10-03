@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # example client down script
 # will be executed when client is down

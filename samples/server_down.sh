@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # example server down script
 # will be executed when server is down
