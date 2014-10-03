@@ -42,7 +42,7 @@ int daemon_start(const shadowvpn_args_t *args) {
   }
   if (pid > 0) {
     // let the child print message to the console first
-    usleep(100);
+    usleep(300);
     exit(0);
   } 
 
