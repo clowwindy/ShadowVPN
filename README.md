@@ -91,4 +91,5 @@ Bugs and Issues
 [Download precompiled]: https://github.com/clowwindy/ShadowVPN/releases
 [Issue Tracker]:        https://github.com/clowwindy/ShadowVPN/issues?state=open
 [Mailing list]:         http://groups.google.com/group/shadowsocks
+[SDK]:                  http://wiki.openwrt.org/doc/howto/obtain.firmware.sdk
 [Travis CI]:            https://travis-ci.org/clowwindy/ShadowVPN
