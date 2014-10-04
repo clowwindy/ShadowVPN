@@ -3,6 +3,8 @@ ShadowVPN
 
 [![Build Status]][Travis CI]
 
+[中文说明][Chinese Readme]
+
 ShadowVPN is a fast, safe VPN based on libsodium. Designed for low end
 devices, i.e. OpenWRT routers.
 
@@ -88,6 +90,7 @@ Bugs and Issues
 * [Mailing list]
 
 [Build Status]:         https://img.shields.io/travis/clowwindy/ShadowVPN/master.svg?style=flat
+[Chinese Readme]:       https://github.com/clowwindy/ShadowVPN/wiki/ShadowVPN-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
 [Download precompiled]: https://github.com/clowwindy/ShadowVPN/releases
 [Issue Tracker]:        https://github.com/clowwindy/ShadowVPN/issues?state=open
 [Mailing list]:         http://groups.google.com/group/shadowsocks
