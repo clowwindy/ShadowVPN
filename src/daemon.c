@@ -27,8 +27,8 @@
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <sys/stat.h>
 #include "shadowvpn.h"
 
@@ -130,26 +130,45 @@ static int write_pid_file(const char *filename, pid_t pid) {
 
 int daemon_stop(const shadowvpn_args_t *args) {
   char buf[PID_BUF_SIZE];
-  int status;
+  int status, i, stopped;
   FILE *fp = fopen(args->pid_file, "r");
   if (fp == NULL) {
-    errf("not started");
-    return -1;
+    printf("not running\n");
+    return 0;
   }
   char *line = fgets(buf, PID_BUF_SIZE, fp);
   fclose(fp);
   if (line == NULL) {
     err("fgets");
-    return -1;
+    return 0;
   }
   pid_t pid = (pid_t)atol(buf);
   if (pid > 0) {
     // make sure pid is not zero or negative
     if (0 != kill(pid, SIGTERM)){
+      if (errno == ESRCH) {
+        printf("not running\n");
+        return 0;
+      }
       err("kill");
       return -1;
     }
-    waitpid(pid, &status, 0);
+    stopped = 0;
+    // wait for maximum 10s
+    for (i = 0; i < 200; i++) {
+      if (-1 == kill(pid, 0)) {
+        if (errno == ESRCH) {
+          stopped = 1;
+          break;
+        }
+      }
+      // sleep 0.05s
+      usleep(50000);
+    }
+    if (!stopped) {
+      errf("timed out when stopping pid %d", pid);
+      return -1;
+    }
     printf("stopped\n");
     if (0 != unlink(args->pid_file)) {
       err("unlink");
