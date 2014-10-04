@@ -201,7 +201,7 @@ int run_vpn(shadowvpn_args_t *args) {
     }
     if (FD_ISSET(control_pipe[0], &readset)) {
       char pipe_buf;
-      read(control_pipe[0], &pipe_buf, 1);
+      (void)read(control_pipe[0], &pipe_buf, 1);
       break;
     }
     if (FD_ISSET(tun, &readset)) {
