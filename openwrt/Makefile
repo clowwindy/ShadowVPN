@@ -21,7 +21,7 @@ define Package/ShadowVPN/Default
   SECTION:=net
   CATEGORY:=Network
   TITLE:=ShadowVPN
-  DEPENDS:=+kmod-tun +ip
+  DEPENDS:=+kmod-tun +ip +iptables
 	URL:=https://github.com/clowwindy/ShadowVPN
 endef
 
