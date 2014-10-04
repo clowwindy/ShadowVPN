@@ -141,8 +141,6 @@ int run_vpn(shadowvpn_args_t *args) {
   struct sockaddr_storage remote_addr;
   struct sockaddr *remote_addrp = (struct sockaddr *)&remote_addr;
   socklen_t remote_addrlen;
-  struct sockaddr *src_addrp = NULL;
-  socklen_t *src_addrlen = NULL;
 
   if (running) {
     errf("can not start, already running");
@@ -152,12 +150,6 @@ int run_vpn(shadowvpn_args_t *args) {
   if (-1 == pipe(control_pipe)) {
     err("pipe");
     return -1;
-  }
-
-  if (args->mode == SHADOWVPN_MODE_SERVER) {
-    // if we are running a server, update server address from recv_from
-    src_addrp = remote_addrp;
-    src_addrlen = &remote_addrlen;
   }
 
   if (-1 == (tun = tun_alloc(args->intf))) {
@@ -238,9 +230,13 @@ int run_vpn(shadowvpn_args_t *args) {
       }
     }
     if (FD_ISSET(sock, &readset)) {
+      // only change remote addr if decryption succeeds
+      struct sockaddr_storage temp_remote_addr;
+      socklen_t temp_remote_addrlen;
       r = recvfrom(sock, udp_buf + SHADOWVPN_PACKET_OFFSET,
                    SHADOWVPN_OVERHEAD_LEN + args->mtu, 0,
-                   src_addrp, src_addrlen);
+                   (struct sockaddr *)&temp_remote_addr,
+                   &temp_remote_addrlen);
       if (r == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
           // do nothing
@@ -254,11 +250,19 @@ int run_vpn(shadowvpn_args_t *args) {
           break;
         }
       }
+      if (r == 0)
+        continue;
 
       if (-1 == crypto_decrypt(tun_buf, udp_buf,
                                r - SHADOWVPN_OVERHEAD_LEN)) {
         errf("dropping invalid packet, maybe wrong password");
       } else {
+        if (args->mode == SHADOWVPN_MODE_SERVER) {
+          // if we are running a server, update server address from recv_from
+          memcpy(remote_addrp, &temp_remote_addr, temp_remote_addrlen);
+          remote_addrlen = temp_remote_addrlen;
+        }
+
         if (-1 == write(tun, tun_buf + SHADOWVPN_ZERO_BYTES,
               r - SHADOWVPN_OVERHEAD_LEN)) {
           if (errno == EAGAIN || errno == EWOULDBLOCK) {
