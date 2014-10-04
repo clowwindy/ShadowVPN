@@ -23,7 +23,9 @@ Make sure to set `--sysconfdir=/etc`. You'll find conf files under `/etc`.
 
 OpenWRT:
 
-cd into [SDK] root, then
+[Download precompiled] for OpenWRT trunk and CPU: ar71xx, brcm63xx, brcm47xx, ramips_24kec.
+
+Or build yourself: cd into [SDK] root, then
 
     pushd package
     git clone https://github.com/clowwindy/ShadowVPN.git
@@ -85,7 +87,8 @@ Bugs and Issues
 * [Issue Tracker]
 * [Mailing list]
 
-[Build Status]:      https://img.shields.io/travis/clowwindy/ShadowVPN/master.svg?style=flat
-[Issue Tracker]:     https://github.com/clowwindy/ShadowVPN/issues?state=open
-[Mailing list]:      http://groups.google.com/group/shadowsocks
-[Travis CI]:         https://travis-ci.org/clowwindy/ShadowVPN
+[Build Status]:         https://img.shields.io/travis/clowwindy/ShadowVPN/master.svg?style=flat
+[Download precompiled]: https://github.com/clowwindy/ShadowVPN/releases
+[Issue Tracker]:        https://github.com/clowwindy/ShadowVPN/issues?state=open
+[Mailing list]:         http://groups.google.com/group/shadowsocks
+[Travis CI]:            https://travis-ci.org/clowwindy/ShadowVPN
