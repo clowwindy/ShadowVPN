@@ -69,6 +69,23 @@ Client(OpenWRT):
     /etc/init.d/shadowvpn start
     /etc/init.d/shadowvpn stop
 
+Wiki
+----
+
+You can find all the documentation in the wiki:
+https://github.com/clowwindy/ShadowVPN/wiki
+
+License
+-------
+MIT
+
+Bugs and Issues
+----------------
+
+* [Issue Tracker]
+* [Mailing list]
 
 [Build Status]:      https://img.shields.io/travis/clowwindy/ShadowVPN/master.svg?style=flat
+[Issue Tracker]:     https://github.com/clowwindy/ShadowVPN/issues?state=open
+[Mailing list]:      http://groups.google.com/group/shadowsocks
 [Travis CI]:         https://travis-ci.org/clowwindy/ShadowVPN
