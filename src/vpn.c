@@ -232,7 +232,7 @@ int run_vpn(shadowvpn_args_t *args) {
     if (FD_ISSET(sock, &readset)) {
       // only change remote addr if decryption succeeds
       struct sockaddr_storage temp_remote_addr;
-      socklen_t temp_remote_addrlen;
+      socklen_t temp_remote_addrlen = sizeof(temp_remote_addr);
       r = recvfrom(sock, udp_buf + SHADOWVPN_PACKET_OFFSET,
                    SHADOWVPN_OVERHEAD_LEN + args->mtu, 0,
                    (struct sockaddr *)&temp_remote_addr,
