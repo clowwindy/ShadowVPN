@@ -87,13 +87,16 @@ MIT
 Bugs and Issues
 ----------------
 
-* [Issue Tracker]
-* [Mailing list]
+- [FAQ]
+- [Issue Tracker]
+- [Mailing list]
+
 
 [Build Status]:         https://img.shields.io/travis/clowwindy/ShadowVPN/master.svg?style=flat
 [Compare]:              https://github.com/clowwindy/ShadowVPN/wiki/Compared-to-Shadowsocks-and-OpenVPN
 [Chinese Readme]:       https://github.com/clowwindy/ShadowVPN/wiki/ShadowVPN-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
 [Download precompiled]: https://github.com/clowwindy/ShadowVPN/releases
+[FAQ]:                  https://github.com/clowwindy/ShadowVPN/wiki/FAQ
 [Issue Tracker]:        https://github.com/clowwindy/ShadowVPN/issues?state=open
 [Mailing list]:         http://groups.google.com/group/shadowsocks
 [SDK]:                  http://wiki.openwrt.org/doc/howto/obtain.firmware.sdk
