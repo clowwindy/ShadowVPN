@@ -74,6 +74,8 @@ Client(OpenWRT):
     /etc/init.d/shadowvpn start
     /etc/init.d/shadowvpn stop
 
+Please read [LuCI Configuration].
+
 Wiki
 ----
 
@@ -98,6 +100,7 @@ Bugs and Issues
 [Download precompiled]: https://github.com/clowwindy/ShadowVPN/releases
 [FAQ]:                  https://github.com/clowwindy/ShadowVPN/wiki/FAQ
 [Issue Tracker]:        https://github.com/clowwindy/ShadowVPN/issues?state=open
+[LuCI Configuration]:   https://github.com/clowwindy/ShadowVPN/wiki/Configure-Via-LuCI-on-OpenWRT
 [Mailing list]:         http://groups.google.com/group/shadowsocks
 [SDK]:                  http://wiki.openwrt.org/doc/howto/obtain.firmware.sdk
 [Travis CI]:            https://travis-ci.org/clowwindy/ShadowVPN
