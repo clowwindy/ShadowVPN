@@ -21,21 +21,23 @@ iptables -A FORWARD -i eth0 -o $intf -j ACCEPT
 
 # get current gateway
 echo reading old gateway from route table
-old_gw=`ip route show | grep '^default' | sed -e 's/.* dev \([^ ]*\).*/\1/'`
+old_gw_intf=`ip route show | grep '^default' | sed -e 's/.* dev \([^ ]*\).*/\1/'`
+old_gw_ip=`ip route show | grep '^default' | sed -e 's/.* via \([^ ]*\).*/\1/'`
 
 # if current gateway is tun, it indicates that our gateway is already changed
 # read from saved file
-if [ $old_gw == "$intf" ]; then
-  echo reading old gateway from /tmp/old_gw
-  old_gw=`cat /tmp/old_gw` || ( echo "can not read gateway, check up.sh" && exit 1 )
+if [ $old_gw_intf == "$intf" ]; then
+  echo reading old gateway from /tmp/old_gw_intf
+  old_gw_intf=`cat /tmp/old_gw_intf` || ( echo "can not read gateway, check up.sh" && exit 1 )
 fi
 
-echo saving old gateway to /tmp/old_gw
-echo $old_gw > /tmp/old_gw
+echo saving old gateway to /tmp/old_gw_intf
+echo $old_gw_intf > /tmp/old_gw_intf
+echo $old_gw_ip > /tmp/old_gw_ip
 
 # change routing table
 echo changing default route
-route add $server $old_gw
+route add $server gw $old_gw_ip || route add $server $old_gw_intf
 route del default
 route add default gw 10.7.0.1
 echo default route changed to 10.7.0.1

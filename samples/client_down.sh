@@ -16,15 +16,17 @@ iptables -D FORWARD -i $intf -o eth0 -m state --state RELATED,ESTABLISHED -j ACC
 iptables -D FORWARD -i eth0 -o $intf -j ACCEPT
 
 # get old gateway
-echo reading old gateway from /tmp/old_gw
-old_gw=`cat /tmp/old_gw` || ( echo "can not read gateway, check up.sh" && exit 1 )
-rm /tmp/old_gw
+echo reading old gateway from /tmp/old_gw_intf
+old_gw_intf=`cat /tmp/old_gw_intf` || ( echo "can not read gateway, check up.sh" && exit 1 )
+old_gw_ip=`cat /tmp/old_gw_ip` || ( echo "can not read gateway, check up.sh" && exit 1 )
+rm /tmp/old_gw_intf
+rm /tmp/old_gw_ip
 
 # change routing table
 echo changing default route
-route del $server $old_gw
+route del $server $old_gw_intf
 route del default
-route add default $old_gw
-echo default route changed to $old_gw
+route add default gw $old_gw_ip || route add default $old_gw_$intf
+echo default route changed to $old_gw_intf
 
 echo $0 done
