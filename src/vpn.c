@@ -134,7 +134,7 @@ static int udp_alloc(int if_bind, const char *host, int port,
   return -1;
 }
 
-int max(int a, int b) {
+static int max(int a, int b) {
   return a > b ? a : b;
 }
 
