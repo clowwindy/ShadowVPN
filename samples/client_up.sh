@@ -37,7 +37,11 @@ echo $old_gw_ip > /tmp/old_gw_ip
 
 # change routing table
 echo changing default route
-route add $server gw $old_gw_ip || route add $server $old_gw_intf
+if [ pppoe-wan == $old_gw_intf ]; then
+  route add $server $old_gw_intf
+else
+  route add $server gw $old_gw_ip
+fi
 route del default
 route add default gw 10.7.0.1
 echo default route changed to 10.7.0.1
