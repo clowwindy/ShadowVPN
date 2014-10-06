@@ -56,7 +56,7 @@ int vpn_get_sock_fd() {
 
 static int tun_alloc(const char *dev) {
   struct ifreq ifr;
-  int fd, err;
+  int fd, e;
 
   if ((fd = open("/dev/net/tun", O_RDWR)) < 0) {
     err("open");
@@ -75,7 +75,7 @@ static int tun_alloc(const char *dev) {
   if(*dev)
     strncpy(ifr.ifr_name, dev, IFNAMSIZ);
 
-  if((err = ioctl(fd, TUNSETIFF, (void *) &ifr)) < 0){
+  if((e = ioctl(fd, TUNSETIFF, (void *) &ifr)) < 0){
     err("ioctl");
     errf("can not setup tun device: %s", dev);
     close(fd);
