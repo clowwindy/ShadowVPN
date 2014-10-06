@@ -47,6 +47,10 @@ static int shell_run(shadowvpn_args_t *args, int is_up) {
   } else {
     script = args->down_script;
   }
+  if (script == NULL || script[0] == 0) {
+    errf("warning: script not set");
+    return 0;
+  }
   buf = malloc(strlen(script) + 8);
   sprintf(buf, "sh %s", script);
   logf("executing %s", script);
