@@ -1,10 +1,12 @@
 bin_PROGRAMS = shadowvpn
 
+lib_LTLIBRARIES = libshadowvpn.la
+
 SUBDIRS = ../libsodium
 
 AM_CFLAGS = -I$(srcdir)/../libsodium/src/libsodium/include
 
-shadowvpn_SOURCES = log.c \
+libshadowvpn_la_SOURCES = log.c \
 	log.h \
 	crypto_secretbox_salsa208poly1305.h \
 	crypto_secretbox_salsa208poly1305.c \
@@ -18,7 +20,10 @@ shadowvpn_SOURCES = log.c \
 	args.c \
 	daemon.h \
 	daemon.c \
-	shadowvpn.h \
-	main.c
-shadowvpn_LDADD = ../libsodium/src/libsodium/libsodium.la
+	shadowvpn.h
+libshadowvpn_la_LIBADD = ../libsodium/src/libsodium/libsodium.la
+
+shadowvpn_SOURCES = main.c
+
+shadowvpn_LDADD = libshadowvpn.la
 

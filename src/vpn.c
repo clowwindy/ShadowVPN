@@ -41,12 +41,18 @@
 
 static int running = 0;
 static int control_pipe[2];
+static int sock = 0;
 
 static int tun_alloc(const char *dev);
 
 static int udp_alloc(int if_bind, const char *host, int port,
                      struct sockaddr *addr, socklen_t* addrlen);
 
+int run_vpn_with_tun_fd(shadowvpn_args_t *args, int user_tun_fd);
+
+int vpn_get_sock_fd() {
+  return sock;
+}
 
 static int tun_alloc(const char *dev) {
   struct ifreq ifr;
@@ -83,7 +89,7 @@ static int udp_alloc(int if_bind, const char *host, int port,
                      struct sockaddr *addr, socklen_t* addrlen) {
   struct addrinfo hints;
   struct addrinfo *res;
-  int sock, r, flags;
+  int r, flags;
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_socktype = SOCK_DGRAM;
@@ -133,6 +139,10 @@ int max(int a, int b) {
 }
 
 int run_vpn(shadowvpn_args_t *args) {
+  return run_vpn_with_tun_fd(args, 0);
+}
+
+int run_vpn_with_tun_fd(shadowvpn_args_t *args, int user_tun_fd) {
   fd_set readset;
   int tun, sock, max_fd;
   ssize_t r;
@@ -152,9 +162,13 @@ int run_vpn(shadowvpn_args_t *args) {
     return -1;
   }
 
-  if (-1 == (tun = tun_alloc(args->intf))) {
-    errf("failed to create tun device");
-    return -1;
+  if (user_tun_fd == 0) {
+    if (-1 == (tun = tun_alloc(args->intf))) {
+      errf("failed to create tun device");
+      return -1;
+    }
+  } else {
+    tun = user_tun_fd;
   }
   if (-1 == (sock = udp_alloc(args->mode == SHADOWVPN_MODE_SERVER,
                               args->server, args->port,
