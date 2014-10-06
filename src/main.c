@@ -29,11 +29,13 @@
 #include <signal.h>
 #include "shadowvpn.h"
 
+static vpn_ctx_t vpn_ctx;
+
 static void sig_handler(int signo) {
   if (signo == SIGINT)
     exit(1);  // for gprof
   else
-    stop_vpn();
+    vpn_stop(&vpn_ctx);
 }
 
 int main(int argc, char **argv) {
@@ -79,5 +81,8 @@ int main(int argc, char **argv) {
   signal(SIGINT, sig_handler);
   signal(SIGTERM, sig_handler);
 
-  return run_vpn(&args);;
+  if (-1 == vpn_ctx_init(&vpn_ctx, &args)) {
+    return EXIT_FAILURE;
+  }
+  return vpn_run(&vpn_ctx);
 }
