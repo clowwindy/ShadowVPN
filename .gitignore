@@ -44,3 +44,5 @@ missing
 stamp-h1
 tags
 test-driver
+shadowvpn-android-*
+android-toolchain-*
