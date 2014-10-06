@@ -21,7 +21,23 @@ LT_INIT
 AC_HEADER_RESOLV
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h stdlib.h string.h sys/socket.h unistd.h])
 
-AC_CHECK_HEADER([linux/if_tun.h],[],[AC_MSG_ERROR([linux/if_tun.h not found.])],[])
+# from OpenVPN configure.ac
+case "$host" in
+    *-*-linux*)
+        AC_DEFINE([TARGET_LINUX], [1], [Are we running on Linux?])
+        AC_CHECK_HEADER([linux/if_tun.h],[],[AC_MSG_ERROR([linux/if_tun.h not found.])],[])
+        ;;
+    *-*-darwin*)
+        AC_DEFINE([TARGET_DARWIN], [1], [Are we running on Mac OS X?])
+        AC_CHECK_HEADER([net/if_tun.h],[],[AC_MSG_ERROR([Mac OS X net/if_tun.h not found.])],[])
+        ;;
+    *-*-freebsd*)
+        AC_DEFINE([TARGET_FREEBSD], [1], [Are we running on FreeBSD?])
+        AC_CHECK_HEADER([net/if_tun.h],[],[AC_MSG_ERROR([FreeBSD net/if_tun.h not found.])],[])
+        ;;
+    *)
+        AC_DEFINE([TARGET_UNKNOWN], [1], [Unknown platform ?])
+esac
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
