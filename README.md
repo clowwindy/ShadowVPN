@@ -74,7 +74,7 @@ Client(OpenWRT):
     /etc/init.d/shadowvpn start
     /etc/init.d/shadowvpn stop
 
-Please read [LuCI Configuration].
+You can also read [LuCI Configuration].
 
 Wiki
 ----
