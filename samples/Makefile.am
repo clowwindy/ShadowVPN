@@ -7,4 +7,5 @@ shadowvpnconf_DATA = client.conf \
 	server_down.sh \
 	server_up.sh
 
-EXTRA_DIST = $(shadowvpnconf_DATA)
+EXTRA_DIST = $(shadowvpnconf_DATA) \
+  30-shadowvpn

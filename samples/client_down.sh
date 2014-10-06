@@ -18,16 +18,13 @@ iptables -D FORWARD -i eth0 -o $intf -j ACCEPT
 # get old gateway
 echo reading old gateway from /tmp/old_gw
 old_gw=`cat /tmp/old_gw` || ( echo "can not read gateway, check up.sh" && exit 1 )
+rm /tmp/old_gw
 
 # change routing table
 echo changing default route
-route del $server gw $old_gw
+route del $server $old_gw
 route del default
-route add default gw $old_gw
+route add default $old_gw
 echo default route changed to $old_gw
-
-############################################
-# remove chnroutes rules here if you need! #
-############################################
 
 echo $0 done
