@@ -136,9 +136,9 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
     return -1;
   }
   if (-1 == (ctx->sock = vpn_udp_alloc(args->mode == SHADOWVPN_MODE_SERVER,
-                                   args->server, args->port,
-                                   ctx->remote_addrp,
-                                   &ctx->remote_addrlen))) {
+                                       args->server, args->port,
+                                       ctx->remote_addrp,
+                                       &ctx->remote_addrlen))) {
     errf("failed to create UDP socket");
     close(ctx->tun);
     return -1;
@@ -155,7 +155,7 @@ int vpn_run(vpn_ctx_t *ctx) {
     errf("can not start, already running");
     return -1;
   }
-    
+
   ctx->running = 1;
 
   shell_up(ctx->args);
@@ -233,7 +233,7 @@ int vpn_run(vpn_ctx_t *ctx) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
           // do nothing
         } else if (errno == ENETUNREACH || errno == ENETDOWN ||
-                    errno == EPERM || errno == EINTR) {
+                   errno == EPERM || errno == EINTR) {
           // just log, do nothing
           err("recvfrom");
         } else {
@@ -296,4 +296,3 @@ int vpn_stop(vpn_ctx_t *ctx) {
   }
   return 0;
 }
-
