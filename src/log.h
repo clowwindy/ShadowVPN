@@ -40,9 +40,23 @@ extern int verbose_mode;
   }                                                               \
 } while (0)
 
+#ifdef HAVE_ANDROID_LOG
+#define logf(s...) \
+      __android_log_print(ANDROID_LOG_INFO, __FILE__, s)
+
+#define errf(s...) \
+      __android_log_print(ANDROID_LOG_ERROR, __FILE__, s)
+                                                                                                
+#define err(s) \
+      __android_log_print(ANDROID_LOG_ERROR, __FILE__, "%s: %s", s, strerror(errno))
+
+#else
+
 #define logf(s...) __LOG(stdout, 0, s)
 #define errf(s...) __LOG(stderr, 1, s)
 #define err(s) perror_timestamp(s, __FILE__, __LINE__)
+
+#endif
 
 #ifdef DEBUG
 #define debugf(s...) logf(s)
