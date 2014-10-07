@@ -18,6 +18,7 @@ Linux:
 Make sure to set `--sysconfdir=/etc`. You'll find conf files under `/etc`.
 
     sudo apt-get install build-essential automake libtool
+    git clone https://github.com/clowwindy/ShadowVPN.git
     git submodule update --init
     ./autogen.sh
     ./configure --enable-static --sysconfdir=/etc
