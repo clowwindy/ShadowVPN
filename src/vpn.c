@@ -117,7 +117,7 @@ static int tun_alloc(const char *dev) {
     close(fd);
     return -1;
   }
-  i = 1;
+  i = 0;
   if (ioctl (fd, TUNSIFHEAD, &i) < 0) {
     err("ioctl[TUNSIFHEAD]");
     errf("can not setup tun device: %s", dev);
