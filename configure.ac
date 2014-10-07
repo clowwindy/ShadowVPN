@@ -23,7 +23,7 @@ AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h stdlib.h string.h sys/socket.h uni
 
 AC_CHECK_HEADER([linux/if_tun.h],[],[AC_MSG_ERROR([linux/if_tun.h not found.])],[])
 
-AC_CHECK_HEADER([android/log.h],[CFALGS="$CFLAGS -DHAVE_ANDROID_LOG"],[],[])
+AC_CHECK_HEADER([android/log.h],[CFLAGS="$CFLAGS -DHAVE_ANDROID_LOG"; LDFLAGS="$LDFLAGS -llog"],[],[])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
