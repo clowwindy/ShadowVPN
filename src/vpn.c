@@ -155,9 +155,6 @@ int vpn_run(vpn_ctx_t *ctx) {
     errf("can not start, already running");
     return -1;
   }
-  struct sockaddr_storage remote_addr;
-  struct sockaddr *remote_addrp = (struct sockaddr *)&remote_addr;
-  socklen_t remote_addrlen;
     
   ctx->running = 1;
 
@@ -204,11 +201,11 @@ int vpn_run(vpn_ctx_t *ctx) {
           break;
         }
       }
-      if (remote_addrlen) {
+      if (ctx->remote_addrlen) {
         crypto_encrypt(ctx->udp_buf, ctx->tun_buf, r);
         r = sendto(ctx->sock, ctx->udp_buf + SHADOWVPN_PACKET_OFFSET,
                    SHADOWVPN_OVERHEAD_LEN + r, 0,
-                   remote_addrp, remote_addrlen);
+                   ctx->remote_addrp, ctx->remote_addrlen);
         if (r == -1) {
           if (errno == EAGAIN || errno == EWOULDBLOCK) {
             // do nothing
@@ -254,8 +251,8 @@ int vpn_run(vpn_ctx_t *ctx) {
       } else {
         if (ctx->args->mode == SHADOWVPN_MODE_SERVER) {
           // if we are running a server, update server address from recv_from
-          memcpy(remote_addrp, &temp_remote_addr, temp_remote_addrlen);
-          remote_addrlen = temp_remote_addrlen;
+          memcpy(ctx->remote_addrp, &temp_remote_addr, temp_remote_addrlen);
+          ctx->remote_addrlen = temp_remote_addrlen;
         }
 
         if (-1 == write(ctx->tun, ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
