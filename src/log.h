@@ -28,6 +28,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 
 extern int verbose_mode;
 
