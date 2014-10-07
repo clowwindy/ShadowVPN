@@ -42,6 +42,10 @@ typedef struct {
   shadowvpn_args_t *args;
 } vpn_ctx_t;
 
+int vpn_tun_alloc(const char *dev);
+int vpn_udp_alloc(int if_bind, const char *host, int port,
+                  struct sockaddr *addr, socklen_t* addrlen);
+
 /* return -1 on error. no need to destroy any resource */
 int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args);
 

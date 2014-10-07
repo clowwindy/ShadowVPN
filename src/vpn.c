@@ -39,7 +39,7 @@
 #include "shadowvpn.h"
 
 
-static int tun_alloc(const char *dev) {
+int vpn_tun_alloc(const char *dev) {
   struct ifreq ifr;
   int fd, e;
 
@@ -51,12 +51,12 @@ static int tun_alloc(const char *dev) {
 
   memset(&ifr, 0, sizeof(ifr));
 
-  /* Flags: IFF_TUN   - TUN device (no Ethernet headers) 
-   *        IFF_TAP   - TAP device  
+  /* Flags: IFF_TUN   - TUN device (no Ethernet headers)
+   *        IFF_TAP   - TAP device
    *
-   *        IFF_NO_PI - Do not provide packet information  
-   */ 
-  ifr.ifr_flags = IFF_TUN | IFF_NO_PI; 
+   *        IFF_NO_PI - Do not provide packet information
+   */
+  ifr.ifr_flags = IFF_TUN | IFF_NO_PI;
   if(*dev)
     strncpy(ifr.ifr_name, dev, IFNAMSIZ);
 
@@ -70,8 +70,8 @@ static int tun_alloc(const char *dev) {
   return fd;
 }
 
-static int udp_alloc(int if_bind, const char *host, int port,
-                     struct sockaddr *addr, socklen_t* addrlen) {
+int vpn_udp_alloc(int if_bind, const char *host, int port,
+                  struct sockaddr *addr, socklen_t* addrlen) {
   struct addrinfo hints;
   struct addrinfo *res;
   int sock, r, flags;
@@ -81,7 +81,7 @@ static int udp_alloc(int if_bind, const char *host, int port,
   hints.ai_protocol = IPPROTO_UDP;
   if (0 != (r = getaddrinfo(host, NULL, &hints, &res))) {
     errf("getaddrinfo: %s", gai_strerror(r));
-    return -1; 
+    return -1;
   }
 
   if (res->ai_family == AF_INET)
@@ -92,7 +92,7 @@ static int udp_alloc(int if_bind, const char *host, int port,
     errf("unknown ai_family %d", res->ai_family);
     return -1;
   }
-  memcpy(addr, res->ai_addr, res->ai_addrlen); 
+  memcpy(addr, res->ai_addr, res->ai_addrlen);
   *addrlen = res->ai_addrlen;
 
   if (-1 == (sock = socket(res->ai_family, SOCK_DGRAM, IPPROTO_UDP))) {
@@ -105,7 +105,7 @@ static int udp_alloc(int if_bind, const char *host, int port,
     if (0 != bind(sock, res->ai_addr, res->ai_addrlen)) {
       err("bind");
       errf("can not bind %s:%d", host, port);
-      return -1; 
+      return -1;
     }
     freeaddrinfo(res);
   }
@@ -131,11 +131,11 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
     err("pipe");
     return -1;
   }
-  if (-1 == (ctx->tun = tun_alloc(args->intf))) {
+  if (-1 == (ctx->tun = vpn_tun_alloc(args->intf))) {
     errf("failed to create tun device");
     return -1;
   }
-  if (-1 == (ctx->sock = udp_alloc(args->mode == SHADOWVPN_MODE_SERVER,
+  if (-1 == (ctx->sock = vpn_udp_alloc(args->mode == SHADOWVPN_MODE_SERVER,
                                    args->server, args->port,
                                    ctx->remote_addrp,
                                    &ctx->remote_addrlen))) {
