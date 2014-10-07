@@ -23,6 +23,8 @@
 
 */
 
+#include "shadowvpn.h"
+
 #include <sys/types.h>
 #include <sys/select.h>
 #include <stdio.h>
@@ -35,10 +37,23 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/if.h>
+
+#ifdef TARGET_DARWIN
+#include <sys/kern_control.h>
+#include <net/if_utun.h>
+#include <sys/sys_domain.h>
+#endif
+
+#ifdef TARGET_LINUX
 #include <linux/if_tun.h>
-#include "shadowvpn.h"
+#endif
+
+#ifdef TARGET_FREEBSD
+#include <net/if_tun.h>
+#endif
 
 
+#ifdef TARGET_LINUX
 int vpn_tun_alloc(const char *dev) {
   struct ifreq ifr;
   int fd, e;
@@ -60,8 +75,8 @@ int vpn_tun_alloc(const char *dev) {
   if(*dev)
     strncpy(ifr.ifr_name, dev, IFNAMSIZ);
 
-  if((e = ioctl(fd, TUNSETIFF, (void *) &ifr)) < 0){
-    err("ioctl");
+  if ((e = ioctl(fd, TUNSETIFF, (void *) &ifr)) < 0) {
+    err("ioctl[TUNSETIFF]");
     errf("can not setup tun device: %s", dev);
     close(fd);
     return -1;
@@ -69,6 +84,35 @@ int vpn_tun_alloc(const char *dev) {
   // strcpy(dev, ifr.ifr_name);
   return fd;
 }
+#endif
+
+#ifdef TARGET_FREEBSD
+int vpn_tun_alloc(const char *dev) {
+  int fd;
+  char devname[32]={0,};
+  snprintf(devname, sizeof(devname), "/dev/%s", dev);
+  if ((fd = open(devname, O_RDWR)) < 0) {
+    err("open");
+    errf("can not open %s", devname);
+    return -1;
+  }
+  int i = IFF_POINTOPOINT | IFF_MULTICAST;
+  if (ioctl(fd, TUNSIFMODE, &i) < 0) {
+    err("ioctl[TUNSIFMODE]");
+    errf("can not setup tun device: %s", dev);
+    close(fd);
+    return -1;
+  }
+  i = 0;
+  if (ioctl(fd, TUNSIFHEAD, &i) < 0) {
+    err("ioctl[TUNSIFHEAD]");
+    errf("can not setup tun device: %s", dev);
+    close(fd);
+    return -1;
+  }
+  return fd;
+}
+#endif
 
 int vpn_udp_alloc(int if_bind, const char *host, int port,
                   struct sockaddr *addr, socklen_t* addrlen) {
