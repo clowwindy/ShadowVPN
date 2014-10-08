@@ -171,7 +171,7 @@ static void load_default_args(shadowvpn_args_t *args) {
 #else
   args->intf = "tun0";
 #endif
-  args->mtu = 1500;
+  args->mtu = 1440;
   args->pid_file = "/var/run/shadowvpn.pid";
   args->log_file = "/var/log/shadowvpn.log";
 }
