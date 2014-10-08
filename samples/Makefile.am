@@ -11,4 +11,6 @@ EXTRA_DIST = $(shadowvpnconf_DATA) \
   30-shadowvpn \
 	freebsd/freebsd_server_down.sh \
 	freebsd/freebsd_server_up.sh \
-	freebsd/pf.conf
+	freebsd/pf.conf \
+	darwin/darwin_client_down.sh \
+	darwin/darwin_client_up.sh

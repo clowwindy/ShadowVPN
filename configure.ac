@@ -29,7 +29,7 @@ case "$host" in
         ;;
     *-*-darwin*)
         AC_DEFINE([TARGET_DARWIN], [1], [Are we running on Mac OS X?])
-        AC_CHECK_HEADER([net/if_tun.h],[],[AC_MSG_ERROR([Mac OS X net/if_tun.h not found.])],[])
+        AC_CHECK_HEADER([net/if_utun.h],[],[AC_MSG_ERROR([Mac OS X net/if_utun.h not found.])],[])
         ;;
     *-*-freebsd*)
         AC_DEFINE([TARGET_FREEBSD], [1], [Are we running on FreeBSD?])
