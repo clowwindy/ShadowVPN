@@ -32,6 +32,14 @@
 
 extern int verbose_mode;
 
+/*
+   err:    same as perror but with timestamp
+   errf:   same as printf to stderr with timestamp and \n
+   logf:   same as printf to stdout with timestamp and \n,
+           and only enabled when verbose is on
+   debugf: same as logf but only compiles with DEBUG flag
+*/
+
 #define __LOG(o, not_stderr, s...) do {                           \
   if (not_stderr || verbose_mode) {                               \
     log_timestamp(o);                                             \
