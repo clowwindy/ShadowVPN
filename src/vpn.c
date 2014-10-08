@@ -23,6 +23,8 @@
 
 */
 
+// TODO we want to put shadowvpn.h at the bottom of the imports
+// but TARGET_* is defined in config.h
 #include "shadowvpn.h"
 
 #include <sys/types.h>

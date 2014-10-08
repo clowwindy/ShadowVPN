@@ -26,8 +26,11 @@
 #ifndef CRYPTO_H
 #define CRYPTO_H
 
+/* call once after start */
 int crypto_init();
 
+// TODO use a struct to hold context instead
+/* call when password changed */
 int crypto_set_password(const char *password,
                         unsigned long long password_len);
 
