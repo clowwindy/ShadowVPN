@@ -35,10 +35,18 @@ case "$host" in
         AC_DEFINE([TARGET_FREEBSD], [1], [Are we running on FreeBSD?])
         AC_CHECK_HEADER([net/if_tun.h],[],[AC_MSG_ERROR([FreeBSD net/if_tun.h not found.])],[])
         ;;
+    *-*-mingw*)
+        AC_DEFINE([TARGET_WIN32], [1], [Are we running on Windows?])
+        WIN32=yes
+        CPPFLAGS="${CPPFLAGS} -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=_WIN32_WINNT_WINXP"
+        LIBS="${LIBS} -lgdi32 -lws2_32"
+        AC_CHECK_HEADERS([windows.h winsock2.h ws2tcpip.h],[],[AC_MSG_ERROR([Windows headers not found.])],[])
+        ;;
     *)
         AC_DEFINE([TARGET_UNKNOWN], [1], [Unknown platform ?])
 esac
 
+AM_CONDITIONAL([WIN32], [test "${WIN32}" = "yes"])
 AC_CHECK_HEADER([android/log.h],[CFLAGS="$CFLAGS -DHAVE_ANDROID_LOG"; LDFLAGS="$LDFLAGS -llog"],[],[])
 
 # Checks for typedefs, structures, and compiler characteristics.

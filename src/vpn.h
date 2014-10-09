@@ -26,14 +26,21 @@
 #ifndef VPN_H
 #define VPN_H
 
+#ifdef TARGET_WIN32
+#include "win32.h"
+#else
 #include <sys/socket.h>
+#endif
 #include "args.h"
 
 typedef struct {
   int running;
   int sock;
   int tun;
+  /* select() in winsock doesn't support file handler */
+#ifndef TARGET_WIN32
   int control_pipe[2];
+#endif
   unsigned char *tun_buf;
   unsigned char *udp_buf;
   struct sockaddr_storage remote_addr;

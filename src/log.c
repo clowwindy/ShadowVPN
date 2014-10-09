@@ -24,7 +24,7 @@
 */
 
 #include <time.h>
-#include "log.h"
+#include "shadowvpn.h"
 
 int verbose_mode;
 
@@ -39,6 +39,18 @@ void log_timestamp(FILE *out) {
 void perror_timestamp(const char *msg, const char *file, int line) {
   log_timestamp(stderr);
   fprintf(stderr, "%s:%d ", file, line);
+#ifdef TARGET_WIN32
+  LPVOID *err_str = NULL;
+  FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                NULL, WSAGetLastError(),
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                (LPTSTR) &err_str, 0, NULL);
+  if (err_str != NULL) {
+    fprintf(stderr, "%s: %s\n", msg, (char *)err_str);
+    LocalFree(err_str);
+  }
+#else
   perror(msg);
+#endif
 }
 

@@ -21,9 +21,13 @@ libshadowvpn_la_SOURCES = log.c \
 	daemon.h \
 	daemon.c \
 	shadowvpn.h
+
+if WIN32
+libshadowvpn_la_SOURCES += win32.c win32.h
+endif
+
 libshadowvpn_la_LIBADD = ../libsodium/src/libsodium/libsodium.la
 
 shadowvpn_SOURCES = main.c
 
 shadowvpn_LDADD = libshadowvpn.la
-

@@ -28,17 +28,20 @@
 #include "shadowvpn.h"
 
 #include <sys/types.h>
-#include <sys/select.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+
+#ifndef TARGET_WIN32
+#include <sys/select.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/if.h>
+#endif
 
 #ifdef TARGET_DARWIN
 #include <sys/kern_control.h>
@@ -68,9 +71,28 @@
 #ifdef TARGET_DARWIN
 #define tun_read(...) utun_read(__VA_ARGS__)
 #define tun_write(...) utun_write(__VA_ARGS__)
-#else
+#elif !defined(TARGET_WIN32)
 #define tun_read(...) read(__VA_ARGS__)
 #define tun_write(...) write(__VA_ARGS__)
+#endif
+
+#ifdef TARGET_WIN32
+
+#undef errno
+#undef EWOULDBLOCK
+#undef EAGAIN
+#undef EINTR
+#undef ENETDOWN
+#undef ENETUNREACH
+
+#define errno WSAGetLastError()
+#define EWOULDBLOCK WSAEWOULDBLOCK
+#define EAGAIN WSAEWOULDBLOCK
+#define EINTR WSAEINTR
+#define ENETUNREACH WSAENETUNREACH
+#define ENETDOWN WSAENETDOWN
+#define close(fd) closesocket(fd)
+
 #endif
 
 #ifdef TARGET_LINUX
@@ -225,6 +247,35 @@ int vpn_tun_alloc(const char *dev) {
 }
 #endif
 
+#ifdef TARGET_WIN32
+static int tun_write(int tun_fd, char *data, size_t len) {
+  DWORD written;
+  DWORD res;
+  OVERLAPPED olpd;
+
+  olpd.Offset = 0;
+  olpd.OffsetHigh = 0;
+  olpd.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+  res = WriteFile(dev_handle, data, len, &written, &olpd);
+  if (!res && GetLastError() == ERROR_IO_PENDING) {
+    WaitForSingleObject(olpd.hEvent, INFINITE);
+    res = GetOverlappedResult(dev_handle, &olpd, &written, FALSE);
+    if (written != len) {
+      return -1;
+    }
+  }
+  return 0;
+}
+
+static int tun_read(int tun_fd, char *buf, size_t len) {
+  return recv(tun_fd, buf, len, 0);
+}
+
+int vpn_tun_alloc(const char *dev) {
+  return tun_open(dev);
+}
+#endif
+
 int vpn_udp_alloc(int if_bind, const char *host, int port,
                   struct sockaddr *addr, socklen_t* addrlen) {
   struct addrinfo hints;
@@ -264,6 +315,13 @@ int vpn_udp_alloc(int if_bind, const char *host, int port,
     }
     freeaddrinfo(res);
   }
+#ifdef TARGET_WIN32
+  u_long mode = 0;
+  if (NO_ERROR == ioctlsocket(sock, FIONBIO, &mode))
+    return sock;
+  close(sock);
+  err("ioctlsocket");
+#else
   flags = fcntl(sock, F_GETFL, 0);
   if (flags != -1) {
     if (-1 != fcntl(sock, F_SETFL, flags | O_NONBLOCK))
@@ -271,21 +329,44 @@ int vpn_udp_alloc(int if_bind, const char *host, int port,
   }
   close(sock);
   err("fcntl");
+#endif
   return -1;
 }
 
+#ifndef TARGET_WIN32
 static int max(int a, int b) {
   return a > b ? a : b;
 }
+#endif
 
 int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
+#ifdef TARGET_WIN32
+  WORD wVersionRequested;
+  WSADATA wsaData;
+  int ret;
+
+  wVersionRequested = MAKEWORD(1, 1);
+  ret = WSAStartup(wVersionRequested, &wsaData);
+  if (ret != 0) {
+    errf("can not initialize winsock");
+    return -1;
+  }
+  if (LOBYTE(wsaData.wVersion) != 1 || HIBYTE(wsaData.wVersion) != 1) {
+    WSACleanup();
+    errf("can not find a usable version of winsock");
+    return -1;
+  }
+#endif
+
   bzero(ctx, sizeof(vpn_ctx_t));
   ctx->remote_addrp = (struct sockaddr *)&ctx->remote_addr;
 
+#ifndef TARGET_WIN32
   if (-1 == pipe(ctx->control_pipe)) {
     err("pipe");
     return -1;
   }
+#endif
   if (-1 == (ctx->tun = vpn_tun_alloc(args->intf))) {
     errf("failed to create tun device");
     return -1;
@@ -324,7 +405,9 @@ int vpn_run(vpn_ctx_t *ctx) {
 
   while (ctx->running) {
     FD_ZERO(&readset);
+#ifndef TARGET_WIN32
     FD_SET(ctx->control_pipe[0], &readset);
+#endif
     FD_SET(ctx->tun, &readset);
     FD_SET(ctx->sock, &readset);
 
@@ -338,11 +421,13 @@ int vpn_run(vpn_ctx_t *ctx) {
       err("select");
       break;
     }
+#ifndef TARGET_WIN32
     if (FD_ISSET(ctx->control_pipe[0], &readset)) {
       char pipe_buf;
       (void)read(ctx->control_pipe[0], &pipe_buf, 1);
       break;
     }
+#endif
     if (FD_ISSET(ctx->tun, &readset)) {
       r = tun_read(ctx->tun, ctx->tun_buf + SHADOWVPN_ZERO_BYTES, ctx->args->mtu);
       if (r == -1) {
@@ -434,6 +519,11 @@ int vpn_run(vpn_ctx_t *ctx) {
   close(ctx->sock);
 
   ctx->running = 0;
+
+#ifdef TARGET_WIN32
+  WSACleanup();
+#endif
+
   return -1;
 }
 
@@ -443,11 +533,16 @@ int vpn_stop(vpn_ctx_t *ctx) {
     errf("can not stop, not running");
     return -1;
   }
+#ifdef TARGET_WIN32
+  shell_down(ctx->args);
+  exit(0);
+#else
   ctx->running = 0;
   char buf = 0;
   if (-1 == write(ctx->control_pipe[1], &buf, 1)) {
     err("write");
     return -1;
   }
+#endif
   return 0;
 }
