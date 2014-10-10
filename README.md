@@ -16,7 +16,8 @@ Install
 #### Unix
 
 Currently Linux, FreeBSD and OS X are supported.
-Make sure to set `--sysconfdir=/etc`. You'll find conf files under `/etc`.
+Clone the repo and build. Make sure to set `--sysconfdir=/etc`.
+You'll find conf files under `/etc`.
 
     # For Debian-based Linux
     sudo apt-get install build-essential automake libtool
