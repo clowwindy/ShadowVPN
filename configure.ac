@@ -35,7 +35,7 @@ case "$host" in
         AC_DEFINE([TARGET_FREEBSD], [1], [Are we running on FreeBSD?])
         AC_CHECK_HEADER([net/if_tun.h],[],[AC_MSG_ERROR([FreeBSD net/if_tun.h not found.])],[])
         ;;
-    *-*-mingw*)
+    *-mingw*)
         AC_DEFINE([TARGET_WIN32], [1], [Are we running on Windows?])
         WIN32=yes
         CPPFLAGS="${CPPFLAGS} -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=_WIN32_WINNT_WINXP"
