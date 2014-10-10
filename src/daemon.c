@@ -23,6 +23,22 @@
 
 */
 
+#include "shadowvpn.h"
+
+#ifdef TARGET_WIN32
+
+int daemon_start(const shadowvpn_args_t *args) {
+  printf("started\n");
+  return 0;
+}
+
+int daemon_stop(const shadowvpn_args_t *args) {
+  printf("stopped\n");
+  return 0;
+}
+
+#else
+
 #include <stdlib.h>
 #include <signal.h>
 #include <unistd.h>
@@ -30,7 +46,6 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "shadowvpn.h"
 
 #define PID_BUF_SIZE 32
 
@@ -180,3 +195,5 @@ int daemon_stop(const shadowvpn_args_t *args) {
   }
   return 0;
 }
+
+#endif

@@ -13,10 +13,12 @@ For more details, [check here][Compare].
 Install
 -------
 
-Linux:
+#### Unix
 
+Currently Linux, FreeBSD and OS X are supported.
 Make sure to set `--sysconfdir=/etc`. You'll find conf files under `/etc`.
 
+    # For Debian-based Linux
     sudo apt-get install build-essential automake libtool
     git clone https://github.com/clowwindy/ShadowVPN.git
     git submodule update --init
@@ -24,7 +26,7 @@ Make sure to set `--sysconfdir=/etc`. You'll find conf files under `/etc`.
     ./configure --enable-static --sysconfdir=/etc
     make && sudo make install
 
-OpenWRT:
+#### OpenWRT
 
 [Download precompiled] for OpenWRT trunk and CPU: ar71xx, brcm63xx, brcm47xx,
 ramips_24kec.
@@ -39,6 +41,27 @@ Or build yourself: cd into [SDK] root, then
     scp bin/xxx/ShadowVPN-xxx-xxx.ipk root@192.168.1.1
     # then log in your box and use opkg to install that ipk file
 
+#### Windows
+
+You need to install the TUN/TAP driver first:
+* [For 32-bit Windows](http://build.openvpn.net/downloads/releases/tap-windows-9.9.2_3.exe)
+* [For 64-bit Windows](http://build.openvpn.net/downloads/releases/tap-windows-9.21.0.exe)
+
+Currently only MinGW compilers are supported. You can compile in Msys or
+cross-compile in Linux or Cygwin with 32-bit or 64-bit MinGW toolchains.
+
+For example, if using 64-bit Cygwin, install `libtool`, `autoconf`, `git`
+and `mingw64-x86_64-gcc-g++` by Cygwin installer. Then build from Cygwin
+terminal by the following commands:
+
+    git clone --recursive https://github.com/clowwindy/ShadowVPN.git
+    cd ShadowVPN
+    ./autogen.sh
+    ./configure --enable-static --host=x86_64-w64-mingw32
+    make && make install DESTDIR="$HOME/shadowvpn-build"
+
+Executables will be generated in `$HOME/shadowvpn-build`.
+
 Configuration
 -------------
 
@@ -50,6 +73,8 @@ Configuration
 - The script file specified by `down` will be executed after VPN is down.
 - If you need to specify routing rules, modify those scripts. You'll see a
 placeholder at the end of those scripts.
+- If you are using Windows, the IP address of TUN/TAP device `tunip` is
+required to be specified in the conf file.
 
 Notice ShadowVPN is a peer-to-peer VPN, which means you'll have one server
 for one client. If you have multiple clients, you should start multiple server
