@@ -121,7 +121,7 @@ Bugs and Issues
 - [Mailing list]
 
 
-[Build Status]:         https://img.shields.io/travis/clowwindy/ShadowVPN/master.svg?style=flat
+[Build Status]:         https://travis-ci.org/clowwindy/ShadowVPN.svg?branch=master
 [Compare]:              https://github.com/clowwindy/ShadowVPN/wiki/Compared-to-Shadowsocks-and-OpenVPN
 [Chinese Readme]:       https://github.com/clowwindy/ShadowVPN/wiki/ShadowVPN-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
 [Download precompiled]: https://github.com/clowwindy/ShadowVPN/releases
