@@ -21,8 +21,15 @@ netsh interface ipv4 set subinterface "%intf%" mtu=%mtu% > NUL
 
 REM change routing table
 ECHO changing default route
-netsh interface ipv4 add route 128.0.0.0/1 "%intf%" %remote_tun_ip% metric=6 > NUL
-netsh interface ipv4 add route 0.0.0.0/1 "%intf%" %remote_tun_ip% metric=6 > NUL
+REM checking if winxp
+ver | find "5.1" > NUL
+if %ERRORLEVEL%==0 (
+    route add 128.0.0.0 mask 128.0.0.0 %remote_tun_ip% metric 6 > NUL
+    route add 0.0.0.0 mask 128.0.0.0 %remote_tun_ip% metric 6 > NUL
+) else (
+    netsh interface ipv4 add route 128.0.0.0/1 "%intf%" %remote_tun_ip% metric=6 > NUL
+    netsh interface ipv4 add route 0.0.0.0/1 "%intf%" %remote_tun_ip% metric=6 > NUL
+)
 ECHO default route changed to %remote_tun_ip%
 
 REM change dns server
