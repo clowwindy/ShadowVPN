@@ -44,5 +44,6 @@ extern char *args_tun_ip;
 
 int tun_open(const char *tun_device);
 int setenv(const char *name, const char *value, int overwrite);
+int disable_reset_report(int fd);
 
 #endif
