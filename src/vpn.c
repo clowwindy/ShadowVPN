@@ -320,7 +320,7 @@ int vpn_udp_alloc(int if_bind, const char *host, int port,
 #ifdef TARGET_WIN32
   u_long mode = 0;
   if (NO_ERROR == ioctlsocket(sock, FIONBIO, &mode))
-    return sock;
+    return disable_reset_report(sock);
   close(sock);
   err("ioctlsocket");
 #else

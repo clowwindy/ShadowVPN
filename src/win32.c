@@ -73,6 +73,8 @@ struct tun_data {
 #define IP_OPT_DONT_FRAG IP_DONTFRAGMENT
 #define DONT_FRAG_VALUE 1
 
+#define SIO_UDP_CONNRESET _WSAIOW(IOC_VENDOR, 12)
+
 HANDLE dev_handle;
 char *args_tun_ip = NULL;
 int args_tun_mask = 24;
@@ -129,7 +131,7 @@ static int open_udp(struct sockaddr_storage *sockaddr, size_t sockaddr_len) {
 
   logf("opened IPv%d UDP socket\n", sockaddr->ss_family == AF_INET6 ? 6 : 4);
 
-  return fd;
+  return disable_reset_report(fd);
 }
 
 static int open_udp_from_host(char *host, int port, int addr_family, int flags) {
@@ -388,4 +390,24 @@ int setenv(const char *name, const char *value, int overwrite) {
   char envbuf[TUN_NAME_BUF_SIZE];
   snprintf(envbuf, sizeof(envbuf), "%s=%s", name, value);
   return _putenv(envbuf);
+}
+
+/*
+* disable new behavior using IOCTL: SIO_UDP_CONNRESET
+* Reference: http://support2.microsoft.com/kb/263823/en-us
+*/
+int disable_reset_report(int fd) {
+  DWORD dwBytesReturned = 0;
+  BOOL bNewBehavior = FALSE;
+  if (INVALID_SOCKET == fd) {
+    return -1;
+  }
+  if (SOCKET_ERROR == WSAIoctl(fd, SIO_UDP_CONNRESET, 
+                               &bNewBehavior, sizeof(bNewBehavior), 
+                               NULL, 0, &dwBytesReturned, NULL, NULL)) {
+    errf("cannot disable UDP-Socket option SIO_UDP_CONNRESET");
+    close(fd);
+    return -1;
+  }
+  return fd;
 }

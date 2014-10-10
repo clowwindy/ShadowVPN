@@ -32,9 +32,9 @@
 
 #define _WIN32_WINNT 0x0501
 
-#include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <windows.h>
 
 #define bzero(...) ZeroMemory(__VA_ARGS__)
 
@@ -44,5 +44,6 @@ extern char *args_tun_ip;
 
 int tun_open(const char *tun_device);
 int setenv(const char *name, const char *value, int overwrite);
+int disable_reset_report(int fd);
 
 #endif
