@@ -84,6 +84,7 @@
 #undef EINTR
 #undef ENETDOWN
 #undef ENETUNREACH
+#undef EMSGSIZE
 
 #define errno WSAGetLastError()
 #define EWOULDBLOCK WSAEWOULDBLOCK
@@ -91,6 +92,7 @@
 #define EINTR WSAEINTR
 #define ENETUNREACH WSAENETUNREACH
 #define ENETDOWN WSAENETDOWN
+#define EMSGSIZE WSAEMSGSIZE
 #define close(fd) closesocket(fd)
 
 #endif

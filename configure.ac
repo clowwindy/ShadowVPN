@@ -38,7 +38,6 @@ case "$host" in
     *-mingw*)
         AC_DEFINE([TARGET_WIN32], [1], [Are we running on Windows?])
         WIN32=yes
-        CPPFLAGS="${CPPFLAGS} -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=_WIN32_WINNT_WINXP"
         LIBS="${LIBS} -lgdi32 -lws2_32"
         AC_CHECK_HEADERS([windows.h winsock2.h ws2tcpip.h],[],[AC_MSG_ERROR([Windows headers not found.])],[])
         ;;

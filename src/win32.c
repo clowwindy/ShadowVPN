@@ -385,5 +385,7 @@ int tun_open(const char *tun_device) {
 }
 
 int setenv(const char *name, const char *value, int overwrite) {
-  return _putenv_s(name, value);
+  char envbuf[TUN_NAME_BUF_SIZE];
+  snprintf(envbuf, sizeof(envbuf), "%s=%s", name, value);
+  return _putenv(envbuf);
 }
