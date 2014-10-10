@@ -27,13 +27,15 @@
 
 #ifdef TARGET_WIN32
 
+/* TODO: support daemonize for Windows */
+
 int daemon_start(const shadowvpn_args_t *args) {
-  printf("started\n");
+  errf("daemonize currently not supported, skipping");
   return 0;
 }
 
 int daemon_stop(const shadowvpn_args_t *args) {
-  printf("stopped\n");
+  errf("daemonize currently not supported, skipping");
   return 0;
 }
 
