@@ -34,8 +34,17 @@ static vpn_ctx_t vpn_ctx;
 #ifdef TARGET_WIN32
 BOOL WINAPI sig_handler(DWORD signo)
 {
-    if (signo == CTRL_C_EVENT)
-      vpn_stop(&vpn_ctx);
+    switch (signo) {
+      case CTRL_C_EVENT:
+      case CTRL_BREAK_EVENT:
+      case CTRL_CLOSE_EVENT:
+      case CTRL_LOGOFF_EVENT:
+      case CTRL_SHUTDOWN_EVENT:
+        vpn_stop(&vpn_ctx);
+        break;
+      default:
+        break;
+    }
     return TRUE;
 }
 #else
