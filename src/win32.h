@@ -40,6 +40,7 @@
 
 extern HANDLE dev_handle;
 extern int args_tun_mask;
+extern int args_tun_port;
 extern char *args_tun_ip;
 
 int tun_open(const char *tun_device);

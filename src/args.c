@@ -171,6 +171,8 @@ static int process_key_value(shadowvpn_args_t *args, const char *key,
     args_tun_ip = strdup(value);
   } else if (strcmp("tunmask", key) == 0) {
     args_tun_mask = (int) atol(value);
+  } else if (strcmp("tunport", key) == 0) {
+    args_tun_port = (int) atol(value);
   }
 #endif
   else {
