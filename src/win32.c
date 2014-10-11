@@ -42,8 +42,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "win32.h"
-#include "log.h"
+#include "shadowvpn.h"
 #include <winioctl.h>
 
 struct tun_data {
