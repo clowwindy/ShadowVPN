@@ -431,7 +431,8 @@ int vpn_run(vpn_ctx_t *ctx) {
     }
 #endif
     if (FD_ISSET(ctx->tun, &readset)) {
-      r = tun_read(ctx->tun, ctx->tun_buf + SHADOWVPN_ZERO_BYTES, ctx->args->mtu);
+      r = tun_read(ctx->tun, ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
+                   ctx->args->mtu);
       if (r == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
           // do nothing

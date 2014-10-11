@@ -22,7 +22,7 @@
   SOFTWARE.
 
 */
-/* 
+/*
  * Windows TUN/TAP support from iodine
  * http://code.kryo.se/iodine/
  *
@@ -84,7 +84,8 @@ static char if_name[TUN_NAME_BUF_SIZE];
 
 static void get_name(char *ifname, int namelen, char *dev_name);
 
-static int get_addr(char *host, int port, int addr_family, int flags, struct sockaddr_storage *out) {
+static int get_addr(char *host, int port, int addr_family, int flags,
+                    struct sockaddr_storage *out) {
   struct addrinfo hints, *addr;
   int res;
   char portnum[8];
@@ -123,7 +124,8 @@ static int open_udp(struct sockaddr_storage *sockaddr, size_t sockaddr_len) {
 #ifdef IP_OPT_DONT_FRAG
   /* Set dont-fragment ip header flag */
   flag = DONT_FRAG_VALUE;
-  setsockopt(fd, IPPROTO_IP, IP_OPT_DONT_FRAG, (const void*) &flag, sizeof(flag));
+  setsockopt(fd, IPPROTO_IP, IP_OPT_DONT_FRAG, (const void*) &flag,
+             sizeof(flag));
 #endif
 
   if(bind(fd, (struct sockaddr*) sockaddr, sockaddr_len) < 0)
@@ -134,7 +136,8 @@ static int open_udp(struct sockaddr_storage *sockaddr, size_t sockaddr_len) {
   return disable_reset_report(fd);
 }
 
-static int open_udp_from_host(char *host, int port, int addr_family, int flags) {
+static int open_udp_from_host(char *host, int port, int addr_family,
+                              int flags) {
   struct sockaddr_storage addr;
   int addrlen;
 
@@ -151,7 +154,8 @@ static void get_device(char *device, int device_len, const char *wanted_dev) {
   int index;
 
   index = 0;
-  status = RegOpenKeyEx(HKEY_LOCAL_MACHINE, TAP_ADAPTER_KEY, 0, KEY_READ, &adapter_key);
+  status = RegOpenKeyEx(HKEY_LOCAL_MACHINE, TAP_ADAPTER_KEY, 0, KEY_READ,
+                        &adapter_key);
 
   if (status != ERROR_SUCCESS) {
     errf("Error opening registry key " TAP_ADAPTER_KEY );
@@ -170,7 +174,8 @@ static void get_device(char *device, int device_len, const char *wanted_dev) {
 
     /* Iterate through all adapter of this kind */
     len = sizeof(name);
-    status = RegEnumKeyEx(adapter_key, index, name, &len, NULL, NULL, NULL, NULL);
+    status = RegEnumKeyEx(adapter_key, index, name, &len, NULL, NULL, NULL,
+                          NULL);
     if (status == ERROR_NO_MORE_ITEMS) {
       break;
     } else if (status != ERROR_SUCCESS) {
@@ -187,18 +192,23 @@ static void get_device(char *device, int device_len, const char *wanted_dev) {
 
     /* Check component id */
     len = sizeof(component);
-    status = RegQueryValueEx(device_key, cid_string, NULL, &datatype, (LPBYTE)component, &len);
+    status = RegQueryValueEx(device_key, cid_string, NULL, &datatype,
+                             (LPBYTE)component, &len);
     if (status != ERROR_SUCCESS || datatype != REG_SZ) {
       goto next;
     }
-    if (strncmp(TAP_VERSION_ID_0801, component, strlen(TAP_VERSION_ID_0801)) == 0 ||
-      strncmp(TAP_VERSION_ID_0901, component, strlen(TAP_VERSION_ID_0901)) == 0) {
+    if (strncmp(TAP_VERSION_ID_0801, component,
+                strlen(TAP_VERSION_ID_0801)) == 0 ||
+        strncmp(TAP_VERSION_ID_0901, component,
+                strlen(TAP_VERSION_ID_0901)) == 0) {
       /* We found a TAP32 device, get its NetCfgInstanceId */
       char iid_string[TUN_NAME_BUF_SIZE] = NET_CFG_INST_ID;
 
-      status = RegQueryValueEx(device_key, iid_string, NULL, &datatype, (LPBYTE) device, (DWORD *) &device_len);
+      status = RegQueryValueEx(device_key, iid_string, NULL, &datatype,
+                               (LPBYTE) device, (DWORD *) &device_len);
       if (status != ERROR_SUCCESS || datatype != REG_SZ) {
-        errf("Error reading registry key %s\\%s on TAP device", unit, iid_string);
+        errf("Error reading registry key %s\\%s on TAP device", unit,
+             iid_string);
       } else {
         /* Done getting GUID of TAP device,
          * now check if the name is the requested one */
@@ -236,14 +246,17 @@ static void get_name(char *ifname, int namelen, char *dev_name) {
   snprintf(path, sizeof(path), NETWORK_KEY "\\%s\\Connection", dev_name);
   status = RegOpenKeyEx(HKEY_LOCAL_MACHINE, path, 0, KEY_READ, &conn_key);
   if (status != ERROR_SUCCESS) {
-    errf("could not look up name of interface %s: error opening key\n", dev_name);
+    errf("could not look up name of interface %s: error opening key\n",
+         dev_name);
     RegCloseKey(conn_key);
     return;
   }
   len = namelen;
-  status = RegQueryValueEx(conn_key, name_str, NULL, &datatype, (LPBYTE)ifname, &len);
+  status = RegQueryValueEx(conn_key, name_str, NULL, &datatype, (LPBYTE)ifname,
+                           &len);
   if (status != ERROR_SUCCESS || datatype != REG_SZ) {
-    errf("could not look up name of interface %s: error reading value\n", dev_name);
+    errf("could not look up name of interface %s: error reading value\n",
+         dev_name);
     RegCloseKey(conn_key);
     return;
   }
@@ -360,7 +373,9 @@ int tun_open(const char *tun_device) {
 
   logf("opening device %s\n", if_name);
   snprintf(tapfile, sizeof(tapfile), "%s%s.tap", TAP_DEVICE_SPACE, adapter);
-  dev_handle = CreateFile(tapfile, GENERIC_WRITE | GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_SYSTEM | FILE_FLAG_OVERLAPPED, NULL);
+  dev_handle = CreateFile(tapfile, GENERIC_WRITE | GENERIC_READ, 0, 0,
+                          OPEN_EXISTING,
+                          FILE_ATTRIBUTE_SYSTEM | FILE_FLAG_OVERLAPPED, NULL);
   if (dev_handle == INVALID_HANDLE_VALUE) {
     errf("can not open device");
     return -1;
@@ -375,7 +390,8 @@ int tun_open(const char *tun_device) {
    * A thread does blocking reads on tun device and
    * sends data as udp to this socket */
 
-  localsock_len = get_addr(TUN_DELEGATE_ADDR, TUN_DELEGATE_PORT, AF_INET, 0, &localsock);
+  localsock_len = get_addr(TUN_DELEGATE_ADDR, TUN_DELEGATE_PORT, AF_INET, 0,
+                           &localsock);
   tunfd = open_udp(&localsock, localsock_len);
 
   data.tun = dev_handle;
@@ -402,8 +418,8 @@ int disable_reset_report(int fd) {
   if (INVALID_SOCKET == fd) {
     return -1;
   }
-  if (SOCKET_ERROR == WSAIoctl(fd, SIO_UDP_CONNRESET, 
-                               &bNewBehavior, sizeof(bNewBehavior), 
+  if (SOCKET_ERROR == WSAIoctl(fd, SIO_UDP_CONNRESET,
+                               &bNewBehavior, sizeof(bNewBehavior),
                                NULL, 0, &dwBytesReturned, NULL, NULL)) {
     errf("cannot disable UDP-Socket option SIO_UDP_CONNRESET");
     close(fd);

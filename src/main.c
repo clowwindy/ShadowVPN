@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
 
 #ifdef TARGET_WIN32
   if (0 == SetConsoleCtrlHandler((PHANDLER_ROUTINE) sig_handler, TRUE)) {
-    errf("can not set control handler"); 
+    errf("can not set control handler");
     return EXIT_FAILURE;
   }
 #else

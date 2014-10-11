@@ -165,7 +165,7 @@ static int process_key_value(shadowvpn_args_t *args, const char *key,
     args->up_script = strdup(value);
   } else if (strcmp("down", key) == 0) {
     args->down_script = strdup(value);
-  } 
+  }
 #ifdef TARGET_WIN32
   else if (strcmp("tunip", key) == 0) {
     args_tun_ip = strdup(value);
