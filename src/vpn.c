@@ -374,8 +374,10 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
     return -1;
   }
 #else
-  if (-1 == (ctx->control_fd = vpn_udp_alloc(1, TUN_DELEGATE_ADDR, args->tun_port + 1, 
-                                             &ctx->control_addr, &ctx->control_addrlen))) {
+  if (-1 == (ctx->control_fd = vpn_udp_alloc(1, TUN_DELEGATE_ADDR,
+                                             args->tun_port + 1,
+                                             &ctx->control_addr,
+                                             &ctx->control_addrlen))) {
     err("failed to create control socket");
     return -1;
   }
@@ -383,7 +385,8 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
     err("CreateEvent");
     return -1;
   }
-  if (-1 == (ctx->tun = tun_open(args->intf, args->tun_ip, args->tun_mask, args->tun_port))) {
+  if (-1 == (ctx->tun = tun_open(args->intf, args->tun_ip, args->tun_mask,
+                                 args->tun_port))) {
     errf("failed to create tun device");
     return -1;
   }
@@ -572,11 +575,13 @@ int vpn_stop(vpn_ctx_t *ctx) {
   int send_sock;
   struct sockaddr addr;
   socklen_t addrlen;
-  if (-1 == (send_sock = vpn_udp_alloc(0, TUN_DELEGATE_ADDR, 0, &addr, &addrlen))) {
+  if (-1 == (send_sock = vpn_udp_alloc(0, TUN_DELEGATE_ADDR, 0, &addr,
+                                       &addrlen))) {
     errf("failed to init control socket");
     return -1;
   }
-  if (-1 == sendto(send_sock, &buf, 1, 0, &ctx->control_addr, ctx->control_addrlen)) {
+  if (-1 == sendto(send_sock, &buf, 1, 0, &ctx->control_addr,
+                   ctx->control_addrlen)) {
     err("sendto");
     close(send_sock);
     return -1;
