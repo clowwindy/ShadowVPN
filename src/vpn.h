@@ -59,7 +59,9 @@ int vpn_run(vpn_ctx_t *ctx);
 int vpn_stop(vpn_ctx_t *ctx);
 
 /* these low level functions are exposed for Android jni */
+#ifndef TARGET_WIN32
 int vpn_tun_alloc(const char *dev);
+#endif
 int vpn_udp_alloc(int if_bind, const char *host, int port,
                   struct sockaddr *addr, socklen_t* addrlen);
 
