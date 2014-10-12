@@ -272,10 +272,6 @@ static int tun_write(int tun_fd, char *data, size_t len) {
 static int tun_read(int tun_fd, char *buf, size_t len) {
   return recv(tun_fd, buf, len, 0);
 }
-
-int vpn_tun_alloc(const char *dev) {
-  return tun_open(dev);
-}
 #endif
 
 int vpn_udp_alloc(int if_bind, const char *host, int port,
@@ -368,11 +364,16 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
     err("pipe");
     return -1;
   }
-#endif
   if (-1 == (ctx->tun = vpn_tun_alloc(args->intf))) {
     errf("failed to create tun device");
     return -1;
   }
+#else
+  if (-1 == (ctx->tun = tun_open(args->intf, args->tun_ip, args->tun_mask, args->tun_port))) {
+    errf("failed to create tun device");
+    return -1;
+  }
+#endif
   if (-1 == (ctx->sock = vpn_udp_alloc(args->mode == SHADOWVPN_MODE_SERVER,
                                        args->server, args->port,
                                        ctx->remote_addrp,

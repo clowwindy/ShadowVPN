@@ -55,7 +55,6 @@ struct tun_data {
 #define TUN_READER_BUF_SIZE (64 * 1024)
 #define TUN_NAME_BUF_SIZE 256
 #define TUN_DELEGATE_ADDR "127.0.0.1"
-#define TUN_DELEGATE_PORT 55151
 
 #define TAP_CONTROL_CODE(request,method) CTL_CODE(FILE_DEVICE_UNKNOWN, request, method, FILE_ANY_ACCESS)
 #define TAP_IOCTL_CONFIG_TUN       TAP_CONTROL_CODE(10, METHOD_BUFFERED)
@@ -71,10 +70,6 @@ struct tun_data {
 #define SIO_UDP_CONNRESET _WSAIOW(IOC_VENDOR, 12)
 
 HANDLE dev_handle;
-char *args_tun_ip = NULL;
-int args_tun_mask = 24;
-int args_tun_port = TUN_DELEGATE_PORT;
-
 static struct tun_data data;
 static char if_name[TUN_NAME_BUF_SIZE];
 
@@ -284,7 +279,7 @@ DWORD WINAPI tun_reader(LPVOID arg) {
   return 0;
 }
 
-int tun_open(const char *tun_device) {
+int tun_open(const char *tun_device, const char *tun_ip, int tun_mask, int tun_port) {
   char adapter[TUN_NAME_BUF_SIZE];
   char tapfile[TUN_NAME_BUF_SIZE * 2];
   int tunfd;
@@ -311,7 +306,7 @@ int tun_open(const char *tun_device) {
     errf("can not open device");
     return -1;
   }
-  if (0 != tun_setip(args_tun_ip, args_tun_mask)) {
+  if (0 != tun_setip(tun_ip, tun_mask)) {
     errf("can not connect device");
     return -1;
   }
@@ -321,9 +316,9 @@ int tun_open(const char *tun_device) {
    * A thread does blocking reads on tun device and
    * sends data as udp to this socket */
 
-  tunfd = vpn_udp_alloc(1, TUN_DELEGATE_ADDR, args_tun_port, &data.addr, &data.addrlen);
+  tunfd = vpn_udp_alloc(1, TUN_DELEGATE_ADDR, tun_port, &data.addr, &data.addrlen);
   if (INVALID_SOCKET == tunfd) {
-    errf("can not bind delegate port for tun: %d", args_tun_port);
+    errf("can not bind delegate port for tun: %d", tun_port);
     return -1;
   }
 

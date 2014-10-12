@@ -37,13 +37,11 @@
 #include <windows.h>
 
 #define bzero(...) ZeroMemory(__VA_ARGS__)
+#define TUN_DELEGATE_PORT 55151
 
 extern HANDLE dev_handle;
-extern int args_tun_mask;
-extern int args_tun_port;
-extern char *args_tun_ip;
 
-int tun_open(const char *tun_device);
+int tun_open(const char *tun_device, const char *tun_ip, int tun_mask, int tun_port);
 int setenv(const char *name, const char *value, int overwrite);
 int disable_reset_report(int fd);
 
