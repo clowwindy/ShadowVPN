@@ -547,6 +547,7 @@ int vpn_run(vpn_ctx_t *ctx) {
   ctx->running = 0;
 
 #ifdef TARGET_WIN32
+  close(ctx->control_fd);
   WSACleanup();
   SetEvent(ctx->cleanEvent);
 #endif
