@@ -54,7 +54,6 @@ struct tun_data {
 
 #define TUN_READER_BUF_SIZE (64 * 1024)
 #define TUN_NAME_BUF_SIZE 256
-#define TUN_DELEGATE_ADDR "127.0.0.1"
 
 #define TAP_CONTROL_CODE(request,method) CTL_CODE(FILE_DEVICE_UNKNOWN, request, method, FILE_ANY_ACCESS)
 #define TAP_IOCTL_CONFIG_TUN       TAP_CONTROL_CODE(10, METHOD_BUFFERED)
@@ -334,9 +333,9 @@ int setenv(const char *name, const char *value, int overwrite) {
 }
 
 /*
-* disable new behavior using IOCTL: SIO_UDP_CONNRESET
-* Reference: http://support2.microsoft.com/kb/263823/en-us
-*/
+ * disable new behavior using IOCTL: SIO_UDP_CONNRESET
+ * Reference: http://support2.microsoft.com/kb/263823/en-us
+ */
 int disable_reset_report(int fd) {
   DWORD dwBytesReturned = 0;
   BOOL bNewBehavior = FALSE;

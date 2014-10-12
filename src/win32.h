@@ -37,6 +37,7 @@
 #include <windows.h>
 
 #define bzero(...) ZeroMemory(__VA_ARGS__)
+#define TUN_DELEGATE_ADDR "127.0.0.1"
 #define TUN_DELEGATE_PORT 55151
 
 extern HANDLE dev_handle;

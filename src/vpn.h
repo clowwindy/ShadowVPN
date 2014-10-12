@@ -40,6 +40,11 @@ typedef struct {
   /* select() in winsock doesn't support file handler */
 #ifndef TARGET_WIN32
   int control_pipe[2];
+#else
+  int control_fd;
+  struct sockaddr control_addr;
+  socklen_t control_addrlen;
+  HANDLE cleanEvent;
 #endif
   unsigned char *tun_buf;
   unsigned char *udp_buf;
