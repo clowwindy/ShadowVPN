@@ -42,21 +42,18 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "win32.h"
-#include "log.h"
+#include "shadowvpn.h"
 #include <winioctl.h>
 
 struct tun_data {
   HANDLE tun;
   int sock;
-  struct sockaddr_storage addr;
-  int addrlen;
+  struct sockaddr addr;
+  socklen_t addrlen;
 };
 
 #define TUN_READER_BUF_SIZE (64 * 1024)
 #define TUN_NAME_BUF_SIZE 256
-#define TUN_DELEGATE_ADDR "127.0.0.1"
-#define TUN_DELEGATE_PORT 55151
 
 #define TAP_CONTROL_CODE(request,method) CTL_CODE(FILE_DEVICE_UNKNOWN, request, method, FILE_ANY_ACCESS)
 #define TAP_IOCTL_CONFIG_TUN       TAP_CONTROL_CODE(10, METHOD_BUFFERED)
@@ -69,84 +66,13 @@ struct tun_data {
 #define TAP_VERSION_ID_0901 "tap0901"
 #define KEY_COMPONENT_ID "ComponentId"
 #define NET_CFG_INST_ID "NetCfgInstanceId"
-
-#define IP_OPT_DONT_FRAG IP_DONTFRAGMENT
-#define DONT_FRAG_VALUE 1
-
 #define SIO_UDP_CONNRESET _WSAIOW(IOC_VENDOR, 12)
 
 HANDLE dev_handle;
-char *args_tun_ip = NULL;
-int args_tun_mask = 24;
-
 static struct tun_data data;
 static char if_name[TUN_NAME_BUF_SIZE];
 
 static void get_name(char *ifname, int namelen, char *dev_name);
-
-static int get_addr(char *host, int port, int addr_family, int flags,
-                    struct sockaddr_storage *out) {
-  struct addrinfo hints, *addr;
-  int res;
-  char portnum[8];
-
-  memset(portnum, 0, sizeof(portnum));
-  snprintf(portnum, sizeof(portnum) - 1, "%d", port);
-
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_family = addr_family;
-  hints.ai_flags = flags;
-  hints.ai_socktype = SOCK_DGRAM;
-  hints.ai_protocol = IPPROTO_UDP;
-
-  res = getaddrinfo(host, portnum, &hints, &addr);
-  if (res == 0) {
-    int addrlen = addr->ai_addrlen;
-    /* Grab first result */
-    memcpy(out, addr->ai_addr, addr->ai_addrlen);
-    freeaddrinfo(addr);
-    return addrlen;
-  }
-  return res;
-}
-
-static int open_udp(struct sockaddr_storage *sockaddr, size_t sockaddr_len) {
-  int flag = 1;
-  int fd;
-
-  if ((fd = socket(sockaddr->ss_family, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
-    err("socket");
-  }
-
-  flag = 1;
-  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const void*) &flag, sizeof(flag));
-
-#ifdef IP_OPT_DONT_FRAG
-  /* Set dont-fragment ip header flag */
-  flag = DONT_FRAG_VALUE;
-  setsockopt(fd, IPPROTO_IP, IP_OPT_DONT_FRAG, (const void*) &flag,
-             sizeof(flag));
-#endif
-
-  if(bind(fd, (struct sockaddr*) sockaddr, sockaddr_len) < 0)
-    err("bind");
-
-  logf("opened IPv%d UDP socket\n", sockaddr->ss_family == AF_INET6 ? 6 : 4);
-
-  return disable_reset_report(fd);
-}
-
-static int open_udp_from_host(char *host, int port, int addr_family,
-                              int flags) {
-  struct sockaddr_storage addr;
-  int addrlen;
-
-  addrlen = get_addr(host, port, addr_family, flags, &addr);
-  if (addrlen < 0)
-    return addrlen;
-
-  return open_udp(&addr, addrlen);
-}
 
 static void get_device(char *device, int device_len, const char *wanted_dev) {
   LONG status;
@@ -331,8 +257,10 @@ DWORD WINAPI tun_reader(LPVOID arg) {
   int res;
   OVERLAPPED olpd;
   int sock;
+  struct sockaddr addr;
+  socklen_t addrlen;
 
-  sock = open_udp_from_host(TUN_DELEGATE_ADDR, 0, AF_INET, 0);
+  sock = vpn_udp_alloc(1, TUN_DELEGATE_ADDR, 0, &addr, &addrlen);
 
   olpd.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 
@@ -343,20 +271,17 @@ DWORD WINAPI tun_reader(LPVOID arg) {
     if (!res) {
       WaitForSingleObject(olpd.hEvent, INFINITE);
       res = GetOverlappedResult(dev_handle, &olpd, (LPDWORD) &len, FALSE);
-      res = sendto(sock, buf, len, 0, (struct sockaddr*) &(tun->addr),
-        tun->addrlen);
+      res = sendto(sock, buf, len, 0, &tun->addr, tun->addrlen);
     }
   }
 
   return 0;
 }
 
-int tun_open(const char *tun_device) {
+int tun_open(const char *tun_device, const char *tun_ip, int tun_mask, int tun_port) {
   char adapter[TUN_NAME_BUF_SIZE];
   char tapfile[TUN_NAME_BUF_SIZE * 2];
   int tunfd;
-  struct sockaddr_storage localsock;
-  int localsock_len;
 
   memset(adapter, 0, sizeof(adapter));
   memset(if_name, 0, sizeof(if_name));
@@ -380,7 +305,7 @@ int tun_open(const char *tun_device) {
     errf("can not open device");
     return -1;
   }
-  if (0 != tun_setip(args_tun_ip, args_tun_mask)) {
+  if (0 != tun_setip(tun_ip, tun_mask)) {
     errf("can not connect device");
     return -1;
   }
@@ -390,15 +315,14 @@ int tun_open(const char *tun_device) {
    * A thread does blocking reads on tun device and
    * sends data as udp to this socket */
 
-  localsock_len = get_addr(TUN_DELEGATE_ADDR, TUN_DELEGATE_PORT, AF_INET, 0,
-                           &localsock);
-  tunfd = open_udp(&localsock, localsock_len);
+  tunfd = vpn_udp_alloc(1, TUN_DELEGATE_ADDR, tun_port, &data.addr, &data.addrlen);
+  if (INVALID_SOCKET == tunfd) {
+    errf("can not bind delegate port for tun: %d", tun_port);
+    return -1;
+  }
 
   data.tun = dev_handle;
-  memcpy(&(data.addr), &localsock, localsock_len);
-  data.addrlen = localsock_len;
   CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) tun_reader, &data, 0, NULL);
-
   return tunfd;
 }
 
@@ -409,9 +333,9 @@ int setenv(const char *name, const char *value, int overwrite) {
 }
 
 /*
-* disable new behavior using IOCTL: SIO_UDP_CONNRESET
-* Reference: http://support2.microsoft.com/kb/263823/en-us
-*/
+ * disable new behavior using IOCTL: SIO_UDP_CONNRESET
+ * Reference: http://support2.microsoft.com/kb/263823/en-us
+ */
 int disable_reset_report(int fd) {
   DWORD dwBytesReturned = 0;
   BOOL bNewBehavior = FALSE;

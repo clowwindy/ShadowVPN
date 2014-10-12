@@ -272,10 +272,6 @@ static int tun_write(int tun_fd, char *data, size_t len) {
 static int tun_read(int tun_fd, char *buf, size_t len) {
   return recv(tun_fd, buf, len, 0);
 }
-
-int vpn_tun_alloc(const char *dev) {
-  return tun_open(dev);
-}
 #endif
 
 int vpn_udp_alloc(int if_bind, const char *host, int port,
@@ -298,6 +294,7 @@ int vpn_udp_alloc(int if_bind, const char *host, int port,
     ((struct sockaddr_in6 *)res->ai_addr)->sin6_port = htons(port);
   else {
     errf("unknown ai_family %d", res->ai_family);
+    freeaddrinfo(res);
     return -1;
   }
   memcpy(addr, res->ai_addr, res->ai_addrlen);
@@ -306,6 +303,7 @@ int vpn_udp_alloc(int if_bind, const char *host, int port,
   if (-1 == (sock = socket(res->ai_family, SOCK_DGRAM, IPPROTO_UDP))) {
     err("socket");
     errf("can not create socket");
+    freeaddrinfo(res);
     return -1;
   }
 
@@ -313,25 +311,28 @@ int vpn_udp_alloc(int if_bind, const char *host, int port,
     if (0 != bind(sock, res->ai_addr, res->ai_addrlen)) {
       err("bind");
       errf("can not bind %s:%d", host, port);
+      close(sock);
+      freeaddrinfo(res);
       return -1;
     }
-    freeaddrinfo(res);
   }
-#ifdef TARGET_WIN32
-  u_long mode = 0;
-  if (NO_ERROR == ioctlsocket(sock, FIONBIO, &mode))
-    return disable_reset_report(sock);
-  close(sock);
-  err("ioctlsocket");
-#else
+  freeaddrinfo(res);
+
+#ifndef TARGET_WIN32
   flags = fcntl(sock, F_GETFL, 0);
   if (flags != -1) {
     if (-1 != fcntl(sock, F_SETFL, flags | O_NONBLOCK))
       return sock;
   }
-  close(sock);
   err("fcntl");
+#else
+  u_long mode = 0;
+  if (NO_ERROR == ioctlsocket(sock, FIONBIO, &mode))
+    return disable_reset_report(sock);
+  err("ioctlsocket");
 #endif
+
+  close(sock);
   return -1;
 }
 
@@ -368,11 +369,25 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
     err("pipe");
     return -1;
   }
-#endif
   if (-1 == (ctx->tun = vpn_tun_alloc(args->intf))) {
     errf("failed to create tun device");
     return -1;
   }
+#else
+  if (-1 == (ctx->control_fd = vpn_udp_alloc(1, TUN_DELEGATE_ADDR, args->tun_port + 1, 
+                                             &ctx->control_addr, &ctx->control_addrlen))) {
+    err("failed to create control socket");
+    return -1;
+  }
+  if (NULL == (ctx->cleanEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
+    err("CreateEvent");
+    return -1;
+  }
+  if (-1 == (ctx->tun = tun_open(args->intf, args->tun_ip, args->tun_mask, args->tun_port))) {
+    errf("failed to create tun device");
+    return -1;
+  }
+#endif
   if (-1 == (ctx->sock = vpn_udp_alloc(args->mode == SHADOWVPN_MODE_SERVER,
                                        args->server, args->port,
                                        ctx->remote_addrp,
@@ -409,6 +424,8 @@ int vpn_run(vpn_ctx_t *ctx) {
     FD_ZERO(&readset);
 #ifndef TARGET_WIN32
     FD_SET(ctx->control_pipe[0], &readset);
+#else
+    FD_SET(ctx->control_fd, &readset);
 #endif
     FD_SET(ctx->tun, &readset);
     FD_SET(ctx->sock, &readset);
@@ -427,6 +444,12 @@ int vpn_run(vpn_ctx_t *ctx) {
     if (FD_ISSET(ctx->control_pipe[0], &readset)) {
       char pipe_buf;
       (void)read(ctx->control_pipe[0], &pipe_buf, 1);
+      break;
+    }
+#else
+    if (FD_ISSET(ctx->control_fd, &readset)) {
+      char buf;
+      recv(ctx->control_fd, &buf, 1, 0);
       break;
     }
 #endif
@@ -524,7 +547,9 @@ int vpn_run(vpn_ctx_t *ctx) {
   ctx->running = 0;
 
 #ifdef TARGET_WIN32
+  close(ctx->control_fd);
   WSACleanup();
+  SetEvent(ctx->cleanEvent);
 #endif
 
   return -1;
@@ -536,16 +561,29 @@ int vpn_stop(vpn_ctx_t *ctx) {
     errf("can not stop, not running");
     return -1;
   }
-#ifdef TARGET_WIN32
-  shell_down(ctx->args);
-  exit(0);
-#else
   ctx->running = 0;
   char buf = 0;
+#ifndef TARGET_WIN32
   if (-1 == write(ctx->control_pipe[1], &buf, 1)) {
     err("write");
     return -1;
   }
+#else
+  int send_sock;
+  struct sockaddr addr;
+  socklen_t addrlen;
+  if (-1 == (send_sock = vpn_udp_alloc(0, TUN_DELEGATE_ADDR, 0, &addr, &addrlen))) {
+    errf("failed to init control socket");
+    return -1;
+  }
+  if (-1 == sendto(send_sock, &buf, 1, 0, &ctx->control_addr, ctx->control_addrlen)) {
+    err("sendto");
+    close(send_sock);
+    return -1;
+  }
+  close(send_sock);
+  WaitForSingleObject(ctx->cleanEvent, INFINITE);
+  CloseHandle(ctx->cleanEvent);
 #endif
   return 0;
 }

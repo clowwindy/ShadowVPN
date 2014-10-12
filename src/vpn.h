@@ -40,6 +40,11 @@ typedef struct {
   /* select() in winsock doesn't support file handler */
 #ifndef TARGET_WIN32
   int control_pipe[2];
+#else
+  int control_fd;
+  struct sockaddr control_addr;
+  socklen_t control_addrlen;
+  HANDLE cleanEvent;
 #endif
   unsigned char *tun_buf;
   unsigned char *udp_buf;
@@ -59,7 +64,9 @@ int vpn_run(vpn_ctx_t *ctx);
 int vpn_stop(vpn_ctx_t *ctx);
 
 /* these low level functions are exposed for Android jni */
+#ifndef TARGET_WIN32
 int vpn_tun_alloc(const char *dev);
+#endif
 int vpn_udp_alloc(int if_bind, const char *host, int port,
                   struct sockaddr *addr, socklen_t* addrlen);
 
