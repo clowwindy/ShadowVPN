@@ -26,7 +26,7 @@ old_gw_ip=`ip route show | grep '^default' | sed -e 's/.* via \([^ ]*\).*/\1/'`
 
 # if current gateway is tun, it indicates that our gateway is already changed
 # read from saved file
-if [ $old_gw_intf == "$intf" ]; then
+if [ "$old_gw_intf" = "$intf" ]; then
   echo reading old gateway from /tmp/old_gw_intf
   old_gw_intf=`cat /tmp/old_gw_intf` || ( echo "can not read gateway, check up.sh" && exit 1 )
 fi
@@ -37,7 +37,7 @@ echo $old_gw_ip > /tmp/old_gw_ip
 
 # change routing table
 echo changing default route
-if [ pppoe-wan == $old_gw_intf ]; then
+if [ pppoe-wan = "$old_gw_intf" ]; then
   route add $server $old_gw_intf
 else
   route add $server gw $old_gw_ip
