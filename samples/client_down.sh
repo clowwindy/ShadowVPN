@@ -26,7 +26,7 @@ rm /tmp/old_gw_ip
 echo changing default route
 route del $server $old_gw_intf
 route del default
-if [ pppoe-wan == $old_gw_intf ]; then
+if [ pppoe-wan = "$old_gw_intf" ]; then
   route add default $old_gw_intf
 else
   route add default gw $old_gw_ip
