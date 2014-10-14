@@ -1,2 +1,13 @@
+0.1.3 2014-10-14
+- Support FreeBSD, OS X and Windows.
+- Fix some issues in example scripts.
+
+0.1.2 2014-10-06
+- Support building for Android.
+- Fix some issues in example scripts.
+
+0.1.1 2014-10-05
+- Support hotplug feature of OpenWRT
+
 0.1.0 2014-10-03
 - initial version
