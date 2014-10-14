@@ -1,12 +1,12 @@
 # hotplug.d for OpenWRT
 
-[ ifup = "$ACTION" ] && {                                                                                    
-  [ wan = "$INTERFACE" ] && {                                                                          
-    /etc/init.d/shadowvpn start                                                                  
-  }                                                                                                    
-}                                                                                                            
-[ ifdown = "$ACTION" ] && {                                                                                  
-  [ wan = "$INTERFACE" ] && {                                                                          
-    /etc/init.d/shadowvpn stop                                                                   
-  }                                                                                                    
+[ ifup = "$ACTION" ] && {
+  [ wan = "$INTERFACE" ] && {
+    /etc/init.d/shadowvpn start
+  }
+}
+[ ifdown = "$ACTION" ] && {
+  [ wan = "$INTERFACE" ] && {
+    /etc/init.d/shadowvpn stop
+  }
 }
