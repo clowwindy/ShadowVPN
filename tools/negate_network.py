@@ -28,6 +28,10 @@ s = [ip_network('0.0.0.0/0')]
 
 for line in sys.stdin:
     line = line.strip()
+    if not line:
+        continue
+    elif line.startswith('#'):
+        continue
     ex_subnet = ip_network(line)
     i = bisect.bisect_right(s, ex_subnet) - 1
     while i < len(s):
