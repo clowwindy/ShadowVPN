@@ -22,6 +22,7 @@
 
 from ipaddress import ip_network
 import sys
+import bisect
 
 s = [ip_network('0.0.0.0/0')]
 
@@ -29,15 +30,19 @@ for line in sys.stdin:
     line = line.strip()
     print(line, file=sys.stderr)
     ex_item = ip_network(line)
-    new_s = []
-    # TODO use binary search
-    for subnet in s:
+    i = bisect.bisect_right(s, ex_item) - 1
+    while i < len(s):
+        subnet = s[i]
         if subnet.overlaps(ex_item):
-            for sub_subnet in subnet.address_exclude(ex_item):
-                new_s.append(sub_subnet)
+            # TODO use linked list
+            del s[i]
+            sub_subnets = list(subnet.address_exclude(ex_item))
+            sub_subnets.sort()
+            for sub_subnet in sub_subnets:
+                s.insert(i, sub_subnet)
+                i += 1
         else:
-            new_s.append(subnet)
-    s = new_s
+            break
 
 s.sort()
 
