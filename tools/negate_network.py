@@ -34,7 +34,8 @@ for line in sys.stdin:
     while i < len(s):
         subnet = s[i]
         if subnet.overlaps(ex_item):
-            # TODO use linked list
+            # since chnroute.txt is sorted, here we are always operating
+            # the last few objects in s, which is almost O(1)
             del s[i]
             sub_subnets = list(subnet.address_exclude(ex_item))
             sub_subnets.sort()
