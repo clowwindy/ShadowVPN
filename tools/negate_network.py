@@ -48,7 +48,5 @@ for line in sys.stdin:
         else:
             break
 
-s.sort()
-
 for subnet in s:
     print(subnet)
