@@ -9,5 +9,8 @@
 # Additional options that are passed to the Daemon.
 DAEMON_OPTS=""
 
+# Enable service
+SERVICE=no
+
 # Server configuration file
 CONFFILE="/etc/shadowvpn/server.conf"
