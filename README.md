@@ -35,6 +35,8 @@ Build package from source:
     git submodule update --init
     ./autogen.sh
     dpkg-buildpackage
+    cd ..
+    sudo dpkg -i shadowvpn*.deb
     
 Enable service:
 
