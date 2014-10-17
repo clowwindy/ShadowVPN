@@ -27,6 +27,23 @@ You'll find conf files under `/etc`.
     ./configure --enable-static --sysconfdir=/etc
     make && sudo make install
 
+#### Debian & Ubuntu
+
+Build package from source:
+
+    sudo apt-get install build-essential automake libtool gawk debhelper
+    git submodule update --init
+    ./autogen.sh
+    dpkg-buildpackage
+    
+Enable service:
+
+    # Edit /etc/default/shadowvpn. Change SERVICE default value
+    SERVICE=yes
+    # Start service
+    sudo service shadowvpn start
+Note: service only supports server-side
+    
 #### OpenWRT
 
 [Download precompiled] for OpenWRT trunk and CPU: ar71xx, brcm63xx, brcm47xx,
