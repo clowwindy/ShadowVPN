@@ -1,15 +1,14 @@
 Source: shadowvpn
-Section: unknown
+Section: net
 Priority: extra
 Maintainer: mark <cqcq233@gmail.com>
-Build-Depends: debhelper (>= 8.0.0)
+Build-Depends: debhelper (>= 8.0.0), autotools-dev, mime-support, gawk
 Standards-Version: 3.9.3
-Homepage: <insert the upstream URL, if relevant>
-#Vcs-Git: git://git.debian.org/collab-maint/shadowvpn.git
-#Vcs-Browser: http://git.debian.org/?p=collab-maint/shadowvpn.git;a=summary
+Homepage: https://github.com/clowwindy/ShadowVPN
+Vcs-Git: git://github.com/clowwindy/ShadowVPN.git
+Vcs-Browser: https://github.com/clowwindy/ShadowVPN
 
 Package: shadowvpn
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Description: A fast, safe VPN based on libsodium
