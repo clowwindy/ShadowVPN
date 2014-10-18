@@ -28,7 +28,7 @@ Then
     apt-get install shadowvpn
     service shadowvpn restart
 
-Or see [Build deb Package].
+For squeeze and i386 see [Build deb Package].
 
 #### Unix
 
