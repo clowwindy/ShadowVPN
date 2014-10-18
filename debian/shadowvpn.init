@@ -62,10 +62,14 @@ do_start()
 #
 do_stop()
 {
-	if [ -e "$PIDFILE" ]
-	then
-	    $DAEMON -c $CONFFILE -s stop
-	fi
+  start-stop-daemon --stop --quiet --retry=TERM/30 --pidfile $PIDFILE --name $NAME
+  RETVAL="$?"
+  [ "$RETVAL" = 2 ] && return 2
+  start-stop-daemon --stop --quiet --oknodo --retry=KILL/5 --exec $DAEMON
+  [ "$?" = 2 ] && return 2
+  # Many daemons don't delete their pidfiles when they exit.
+  rm -f $PIDFILE
+  return "$RETVAL"
 }
 
 #
@@ -110,7 +114,7 @@ case "$1" in
 	#do_reload
 	#log_end_msg $?
 	#;;
-  restart|force-reload)
+  restart)
 	#
 	# If the "reload" option is implemented then remove the
 	# 'force-reload' alias

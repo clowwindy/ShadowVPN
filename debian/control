@@ -1,7 +1,7 @@
 Source: shadowvpn
 Section: net
 Priority: extra
-Maintainer: mark <cqcq233@gmail.com>
+Maintainer: clowwindy <clowwindy42@gmail.com>
 Build-Depends: debhelper (>= 8.0.0), autotools-dev, mime-support, gawk
 Standards-Version: 3.9.3
 Homepage: https://github.com/clowwindy/ShadowVPN

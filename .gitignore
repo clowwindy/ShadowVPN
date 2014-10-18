@@ -47,3 +47,8 @@ tags
 test-driver
 shadowvpn-android-*
 android-toolchain-*
+debian/shadowvpn.postinst.debhelper
+debian/shadowvpn.postrm.debhelper
+debian/shadowvpn.prerm.debhelper
+debian/shadowvpn.substvars
+debian/shadowvpn/
