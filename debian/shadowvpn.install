@@ -2,3 +2,6 @@ src/shadowvpn usr/bin/
 samples/server.conf etc/shadowvpn/
 samples/server_up.sh etc/shadowvpn/
 samples/server_down.sh etc/shadowvpn/
+samples/client.conf etc/shadowvpn/
+samples/client_up.sh etc/shadowvpn/
+samples/client_down.sh etc/shadowvpn/
