@@ -15,8 +15,8 @@ Install
 
 #### Debian & Ubuntu
 
-For Debian 7 and Ubuntu 12+, add the following line to `/etc/apt/sources.list`
-    
+For amd64 CPU Debian 7 and Ubuntu 12+, add the following line to `/etc/apt/sources.list`
+
     deb http://shadowvpn.org/debian wheezy main
 
 Then
