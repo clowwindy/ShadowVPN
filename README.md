@@ -13,6 +13,20 @@ For more details, [check here][Compare].
 Install
 -------
 
+#### Debian & Ubuntu
+
+For Debian 7 and Ubuntu 12+, add the following line to `/etc/apt/sources.list`
+    
+    deb http://shadowvpn.org/debian wheezy main
+
+Then
+
+    apt-get update
+    apt-get install shadowvpn
+    service shadowvpn restart
+
+Or see [Build deb Package].
+
 #### Unix
 
 Currently Linux, FreeBSD and OS X are supported.
@@ -26,25 +40,6 @@ You'll find conf files under `/etc`.
     ./autogen.sh
     ./configure --enable-static --sysconfdir=/etc
     make && sudo make install
-
-#### Debian & Ubuntu
-
-Build package from source:
-
-    sudo apt-get install build-essential automake libtool gawk debhelper
-    git submodule update --init
-    ./autogen.sh
-    dpkg-buildpackage
-    cd ..
-    sudo dpkg -i shadowvpn*.deb
-    
-Enable service:
-
-    # Edit /etc/default/shadowvpn. Change SERVICE default value
-    SERVICE=yes
-    # Start service
-    sudo service shadowvpn start
-Note: service only supports server-side
     
 #### OpenWRT
 
@@ -110,6 +105,8 @@ Server:
     sudo shadowvpn -c /etc/shadowvpn/server.conf -s start
     sudo shadowvpn -c /etc/shadowvpn/server.conf -s stop
 
+If you installed using apt-get, you can use `sudo service shadowvpn start` instead.
+
 Client:
 
     sudo shadowvpn -c /etc/shadowvpn/client.conf -s start
@@ -141,6 +138,7 @@ Bugs and Issues
 
 
 [Build Status]:         https://travis-ci.org/clowwindy/ShadowVPN.svg?branch=master
+[Build deb Package]:    https://github.com/clowwindy/ShadowVPN/wiki/Building-deb-Package
 [Compare]:              https://github.com/clowwindy/ShadowVPN/wiki/Compared-to-Shadowsocks-and-OpenVPN
 [Chinese Readme]:       https://github.com/clowwindy/ShadowVPN/wiki/ShadowVPN-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
 [Download precompiled]: https://github.com/clowwindy/ShadowVPN/releases
