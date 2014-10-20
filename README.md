@@ -39,6 +39,7 @@ You'll find conf files under `/etc`.
     # For Debian-based Linux
     sudo apt-get install build-essential automake libtool
     git clone https://github.com/clowwindy/ShadowVPN.git
+    cd ShadowVPN
     git submodule update --init
     ./autogen.sh
     ./configure --enable-static --sysconfdir=/etc
