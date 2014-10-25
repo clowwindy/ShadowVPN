@@ -37,7 +37,8 @@ Clone the repo and build. Make sure to set `--sysconfdir=/etc`.
 You'll find conf files under `/etc`.
 
     # For Debian-based Linux
-    sudo apt-get install build-essential automake libtool
+    sudo apt-get update
+    sudo apt-get install build-essential automake libtool git -y
     git clone https://github.com/clowwindy/ShadowVPN.git
     cd ShadowVPN
     git submodule update --init
