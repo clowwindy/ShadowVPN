@@ -9,11 +9,13 @@
 # uncomment if you want to turn off IP forwarding
 # sysctl -w net.ipv4.ip_forward=0
 
-# turn off NAT over eth0 and VPN
-# if you use other interface name that eth0, replace eth0 with it
-iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
-iptables -D FORWARD -i eth0 -o $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -D FORWARD -i $intf -o eth0 -j ACCEPT
+# get default gateway
+gw_intf=`ip route show | grep '^default' | sed -e 's/.* dev \([^ ]*\).*/\1/'`
+
+# turn off NAT over gw_intf and VPN
+iptables -t nat -D POSTROUTING -o $gw_intf -j MASQUERADE
+iptables -D FORWARD -i $gw_intf -o $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -D FORWARD -i $intf -o $gw_intf -j ACCEPT
 
 # turn off MSS fix
 # MSS = MTU - TCP header - IP header

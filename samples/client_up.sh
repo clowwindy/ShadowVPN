@@ -13,12 +13,6 @@ sysctl -w net.ipv4.ip_forward=1
 ifconfig $intf 10.7.0.2 netmask 255.255.255.0
 ifconfig $intf mtu $mtu
 
-# turn on NAT over VPN and eth0
-# if you use other interface name that eth0, replace eth0 with it
-iptables -t nat -A POSTROUTING -o $intf -j MASQUERADE
-iptables -A FORWARD -i $intf -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A FORWARD -i eth0 -o $intf -j ACCEPT
-
 # get current gateway
 echo reading old gateway from route table
 old_gw_intf=`ip route show | grep '^default' | sed -e 's/.* dev \([^ ]*\).*/\1/'`
@@ -34,6 +28,11 @@ fi
 echo saving old gateway to /tmp/old_gw_intf
 echo $old_gw_intf > /tmp/old_gw_intf
 echo $old_gw_ip > /tmp/old_gw_ip
+
+# turn on NAT over VPN and old_gw_intf
+iptables -t nat -A POSTROUTING -o $intf -j MASQUERADE
+iptables -A FORWARD -i $intf -o $old_gw_intf -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -i $old_gw_intf -o $intf -j ACCEPT
 
 # change routing table
 echo changing default route

@@ -9,18 +9,19 @@
 # uncomment if you want to turn off IP forwarding
 # sysctl -w net.ipv4.ip_forward=0
 
-# turn off NAT over VPN and eth0
-# if you use other interface name that eth0, replace eth0 with it
-iptables -t nat -D POSTROUTING -o $intf -j MASQUERADE
-iptables -D FORWARD -i $intf -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -D FORWARD -i eth0 -o $intf -j ACCEPT
-
 # get old gateway
 echo reading old gateway from /tmp/old_gw_intf
-old_gw_intf=`cat /tmp/old_gw_intf` || ( echo "can not read gateway, check up.sh" && exit 1 )
-old_gw_ip=`cat /tmp/old_gw_ip` || ( echo "can not read gateway, check up.sh" && exit 1 )
-rm /tmp/old_gw_intf
-rm /tmp/old_gw_ip
+old_gw_ip=`cat /tmp/old_gw_ip` && old_gw_intf=`cat /tmp/old_gw_intf`
+rm -f /tmp/old_gw_intf /tmp/old_gw_ip
+if [ -z "$old_gw_intf" ]; then
+  echo "can not read gateway, check up.sh"
+  exit 1
+fi
+
+# turn off NAT over VPN and old_gw_intf
+iptables -t nat -D POSTROUTING -o $intf -j MASQUERADE
+iptables -D FORWARD -i $intf -o $old_gw_intf -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -D FORWARD -i $old_gw_intf -o $intf -j ACCEPT
 
 # change routing table
 echo changing default route

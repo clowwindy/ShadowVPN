@@ -13,11 +13,13 @@ sysctl -w net.ipv4.ip_forward=1
 ifconfig $intf 10.7.0.1 netmask 255.255.255.0
 ifconfig $intf mtu $mtu
 
-# turn on NAT over eth0 and VPN
-# if you use other interface name that eth0, replace eth0 with it
-iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-iptables -A FORWARD -i eth0 -o $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A FORWARD -i $intf -o eth0 -j ACCEPT
+# get default gateway
+gw_intf=`ip route show | grep '^default' | sed -e 's/.* dev \([^ ]*\).*/\1/'`
+
+# turn on NAT over gw_intf and VPN
+iptables -t nat -A POSTROUTING -o $gw_intf -j MASQUERADE
+iptables -A FORWARD -i $gw_intf -o $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -i $intf -o $gw_intf -j ACCEPT
 
 # turn on MSS fix
 # MSS = MTU - TCP header - IP header
