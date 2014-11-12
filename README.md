@@ -18,7 +18,7 @@ Install
 
 #### Debian & Ubuntu
 
-For amd64 CPU Debian 7 and Ubuntu 12+, add the following line to `/etc/apt/sources.list`
+For Debian 7 and Ubuntu 12+, add the following line to `/etc/apt/sources.list`
 
     deb http://shadowvpn.org/debian wheezy main
 
@@ -28,7 +28,7 @@ Then
     apt-get install shadowvpn
     service shadowvpn restart
 
-For squeeze and i386 see [Build deb Package].
+Or see [Build deb Package].
 
 #### Unix
 
