@@ -29,10 +29,10 @@ echo saving old gateway to /tmp/old_gw_intf
 echo $old_gw_intf > /tmp/old_gw_intf
 echo $old_gw_ip > /tmp/old_gw_ip
 
-# turn on NAT over VPN and old_gw_intf
+# turn on NAT over VPN
 iptables -t nat -A POSTROUTING -o $intf -j MASQUERADE
-iptables -A FORWARD -i $intf -o $old_gw_intf -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A FORWARD -i $old_gw_intf -o $intf -j ACCEPT
+iptables -I FORWARD 1 -i $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -I FORWARD 1 -o $intf -j ACCEPT
 
 # change routing table
 echo changing default route

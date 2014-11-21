@@ -18,10 +18,10 @@ if [ -z "$old_gw_intf" ]; then
   exit 1
 fi
 
-# turn off NAT over VPN and old_gw_intf
+# turn off NAT over VPN
 iptables -t nat -D POSTROUTING -o $intf -j MASQUERADE
-iptables -D FORWARD -i $intf -o $old_gw_intf -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -D FORWARD -i $old_gw_intf -o $intf -j ACCEPT
+iptables -D FORWARD -i $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -D FORWARD -o $intf -j ACCEPT
 
 # change routing table
 echo changing default route
