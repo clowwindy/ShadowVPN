@@ -59,6 +59,8 @@
 #include <net/if_tun.h>
 #endif
 
+#include <sodium.h>
+
 /*
  * Darwin & OpenBSD use utun which is slightly
  * different from standard tun device. It adds
@@ -343,6 +345,7 @@ static int max(int a, int b) {
 #endif
 
 int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
+  int i;
 #ifdef TARGET_WIN32
   WORD wVersionRequested;
   WSADATA wsaData;
@@ -391,21 +394,40 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
     return -1;
   }
 #endif
-  if (-1 == (ctx->sock = vpn_udp_alloc(args->mode == SHADOWVPN_MODE_SERVER,
-                                       args->server, args->port,
-                                       ctx->remote_addrp,
-                                       &ctx->remote_addrlen))) {
-    errf("failed to create UDP socket");
-    close(ctx->tun);
-    return -1;
+  if (args->mode == SHADOWVPN_MODE_SERVER) {
+    ctx->nsock = 1;
+  } else {
+    // if we are client, we should have multiple sockets for each port
+    ctx->nsock = args->concurrency;
+    err("test");
+  }
+  ctx->socks = calloc(ctx->nsock, sizeof(int));
+  for (i = 0; i < ctx->nsock; i++) {
+    int *sock = ctx->socks + i;
+    if (-1 == (*sock = vpn_udp_alloc(args->mode == SHADOWVPN_MODE_SERVER,
+                                     args->server, args->port,
+                                     ctx->remote_addrp,
+                                     &ctx->remote_addrlen))) {
+      errf("failed to create UDP socket");
+      close(ctx->tun);
+      return -1;
+    }
   }
   ctx->args = args;
   return 0;
 }
 
+int choose_client_socket(vpn_ctx_t *ctx) {
+  if (ctx->nsock == 1) {
+    return ctx->socks[0];
+  }
+  uint32_t r = randombytes_uniform(ctx->nsock);
+  return ctx->socks[r];
+}
+
 int vpn_run(vpn_ctx_t *ctx) {
   fd_set readset;
-  int max_fd;
+  int max_fd = 0, i;
   ssize_t r;
   if (ctx->running) {
     errf("can not start, already running");
@@ -431,11 +453,14 @@ int vpn_run(vpn_ctx_t *ctx) {
     FD_SET(ctx->control_fd, &readset);
 #endif
     FD_SET(ctx->tun, &readset);
-    FD_SET(ctx->sock, &readset);
+    for (i = 0; i < ctx->nsock; i++) {
+      FD_SET(ctx->socks[i], &readset);
+      max_fd = max(max_fd, ctx->socks[i]);
+    }
 
     // we assume that pipe fd is always less than tun and sock fd which are
     // created later
-    max_fd = max(ctx->tun, ctx->sock) + 1;
+    max_fd = max(ctx->tun, max_fd) + 1;
 
     if (-1 == select(max_fd, &readset, NULL, NULL, NULL)) {
       if (errno == EINTR)
@@ -472,7 +497,8 @@ int vpn_run(vpn_ctx_t *ctx) {
       }
       if (ctx->remote_addrlen) {
         crypto_encrypt(ctx->udp_buf, ctx->tun_buf, r);
-        r = sendto(ctx->sock, ctx->udp_buf + SHADOWVPN_PACKET_OFFSET,
+        int sock_to_send = choose_client_socket(ctx);
+        r = sendto(sock_to_send, ctx->udp_buf + SHADOWVPN_PACKET_OFFSET,
                    SHADOWVPN_OVERHEAD_LEN + r, 0,
                    ctx->remote_addrp, ctx->remote_addrlen);
         if (r == -1) {
@@ -490,50 +516,54 @@ int vpn_run(vpn_ctx_t *ctx) {
         }
       }
     }
-    if (FD_ISSET(ctx->sock, &readset)) {
-      // only change remote addr if decryption succeeds
-      struct sockaddr_storage temp_remote_addr;
-      socklen_t temp_remote_addrlen = sizeof(temp_remote_addr);
-      r = recvfrom(ctx->sock, ctx->udp_buf + SHADOWVPN_PACKET_OFFSET,
-                   SHADOWVPN_OVERHEAD_LEN + ctx->args->mtu, 0,
-                   (struct sockaddr *)&temp_remote_addr,
-                   &temp_remote_addrlen);
-      if (r == -1) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-          // do nothing
-        } else if (errno == ENETUNREACH || errno == ENETDOWN ||
-                   errno == EPERM || errno == EINTR) {
-          // just log, do nothing
-          err("recvfrom");
-        } else {
-          err("recvfrom");
-          // TODO rebuild socket
-          break;
-        }
-      }
-      if (r == 0)
-        continue;
-
-      if (-1 == crypto_decrypt(ctx->tun_buf, ctx->udp_buf,
-                               r - SHADOWVPN_OVERHEAD_LEN)) {
-        errf("dropping invalid packet, maybe wrong password");
-      } else {
-        if (ctx->args->mode == SHADOWVPN_MODE_SERVER) {
-          // if we are running a server, update server address from recv_from
-          memcpy(ctx->remote_addrp, &temp_remote_addr, temp_remote_addrlen);
-          ctx->remote_addrlen = temp_remote_addrlen;
-        }
-
-        if (-1 == tun_write(ctx->tun, ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
-              r - SHADOWVPN_OVERHEAD_LEN)) {
+    for (i = 0; i < ctx->nsock; i++) {
+      int sock = ctx->socks[i];
+      if (FD_ISSET(sock, &readset)) {
+        // only change remote addr if decryption succeeds
+        struct sockaddr_storage temp_remote_addr;
+        socklen_t temp_remote_addrlen = sizeof(temp_remote_addr);
+        r = recvfrom(sock, ctx->udp_buf + SHADOWVPN_PACKET_OFFSET,
+                    SHADOWVPN_OVERHEAD_LEN + ctx->args->mtu, 0,
+                    (struct sockaddr *)&temp_remote_addr,
+                    &temp_remote_addrlen);
+        if (r == -1) {
           if (errno == EAGAIN || errno == EWOULDBLOCK) {
             // do nothing
-          } else if (errno == EPERM || errno == EINTR || errno == EINVAL) {
+          } else if (errno == ENETUNREACH || errno == ENETDOWN ||
+                    errno == EPERM || errno == EINTR) {
             // just log, do nothing
-            err("write to tun");
+            err("recvfrom");
           } else {
-            err("write to tun");
+            err("recvfrom");
+            // TODO rebuild socket
             break;
+          }
+        }
+        if (r == 0)
+          continue;
+
+        if (-1 == crypto_decrypt(ctx->tun_buf, ctx->udp_buf,
+                                r - SHADOWVPN_OVERHEAD_LEN)) {
+          errf("dropping invalid packet, maybe wrong password");
+        } else {
+          if (ctx->args->mode == SHADOWVPN_MODE_SERVER) {
+            // if we are running a server, update server address from
+            // recv_from
+            memcpy(ctx->remote_addrp, &temp_remote_addr, temp_remote_addrlen);
+            ctx->remote_addrlen = temp_remote_addrlen;
+          }
+
+          if (-1 == tun_write(ctx->tun, ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
+                r - SHADOWVPN_OVERHEAD_LEN)) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+              // do nothing
+            } else if (errno == EPERM || errno == EINTR || errno == EINVAL) {
+              // just log, do nothing
+              err("write to tun");
+            } else {
+              err("write to tun");
+              break;
+            }
           }
         }
       }
@@ -545,7 +575,9 @@ int vpn_run(vpn_ctx_t *ctx) {
   shell_down(ctx->args);
 
   close(ctx->tun);
-  close(ctx->sock);
+  for (i = 0; i < ctx->nsock; i++) {
+    close(ctx->socks[i]);
+  }
 
   ctx->running = 0;
 

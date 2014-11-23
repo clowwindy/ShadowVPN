@@ -53,6 +53,7 @@ typedef struct {
   const char *server;
   uint16_t port;
   uint16_t mtu;
+  uint16_t concurrency;
   const char *up_script;
   const char *down_script;
 #ifdef TARGET_WIN32
