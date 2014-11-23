@@ -78,6 +78,10 @@ int strategy_choose_remote_addr(vpn_ctx_t *ctx) {
   time_t now;
   addr_info_t *latest = NULL, *temp;
 
+  if (ctx->nknown_addr == 0) {
+    return 0;
+  }
+
   time(&now);
 
   for (i = 0; i < ctx->nknown_addr; i++) {
