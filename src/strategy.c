@@ -74,7 +74,7 @@ int strategy_choose_remote_addr(vpn_ctx_t *ctx) {
   // 2. if number <= 1, use latest
   // 3. if number > 1, generate random i in (0, number),
   //    scan again and pick (i)th address not timed out
-  int i, total_not_timed_out, chosen;
+  int i, total_not_timed_out = 0, chosen;
   time_t now;
   addr_info_t *latest = NULL, *temp;
 
@@ -90,7 +90,7 @@ int strategy_choose_remote_addr(vpn_ctx_t *ctx) {
         latest->last_recv_time < temp->last_recv_time) {
       latest = temp;
     }
-    if (now - temp->last_recv_time > ADDR_TIMEOUT) {
+    if (now - temp->last_recv_time <= ADDR_TIMEOUT) {
       total_not_timed_out++;
     }
   }
@@ -101,10 +101,9 @@ int strategy_choose_remote_addr(vpn_ctx_t *ctx) {
     total_not_timed_out = 0;
     for (i = 0; i < ctx->nknown_addr; i++) {
       temp = &ctx->known_addrs[i];
-      if (now - temp->last_recv_time > ADDR_TIMEOUT) {
+      if (now - temp->last_recv_time <= ADDR_TIMEOUT) {
         if (total_not_timed_out == chosen) {
-          load_addr(&ctx->known_addrs[i], &ctx->remote_addr,
-                    &ctx->remote_addrlen);
+          load_addr(temp, &ctx->remote_addr, &ctx->remote_addrlen);
           break;
         }
         total_not_timed_out++;
