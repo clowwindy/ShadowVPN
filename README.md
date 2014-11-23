@@ -33,19 +33,15 @@ Or see [Build deb Package].
 #### Unix
 
 Currently Linux, FreeBSD and OS X are supported.
-Clone the repo and build. Make sure to set `--sysconfdir=/etc`.
-You'll find conf files under `/etc`.
+Download a [release] and build. Do not clone the repo, since it's not stable.
+Make sure to set `--sysconfdir=/etc`. You'll find conf files under `/etc`.
 
     # For Debian-based Linux
     sudo apt-get update
     sudo apt-get install build-essential automake libtool git -y
-    git clone https://github.com/clowwindy/ShadowVPN.git
-    cd ShadowVPN
-    git submodule update --init
-    ./autogen.sh
     ./configure --enable-static --sysconfdir=/etc
     make && sudo make install
-    
+
 #### OpenWRT
 
 [Download precompiled] for OpenWRT trunk and CPU: ar71xx, brcm63xx, brcm47xx,
@@ -71,12 +67,10 @@ Currently only MinGW compilers are supported. You can compile in Msys or
 cross-compile in Linux or Cygwin with 32-bit or 64-bit MinGW toolchains.
 
 For example, if using 64-bit Cygwin, install `libtool`, `autoconf`, `git`
-and `mingw64-x86_64-gcc-g++` by Cygwin installer. Then build from Cygwin
-terminal by the following commands:
+and `mingw64-x86_64-gcc-g++` by Cygwin installer. Then Download a [release]
+and build. Build from Cygwin terminal by the following commands:
 
-    git clone --recursive https://github.com/clowwindy/ShadowVPN.git
     cd ShadowVPN
-    ./autogen.sh
     ./configure --enable-static --host=x86_64-w64-mingw32
     make && make install DESTDIR="$HOME/shadowvpn-build"
 
@@ -151,5 +145,6 @@ Bugs and Issues
 [Issue Tracker]:        https://github.com/clowwindy/ShadowVPN/issues?state=open
 [LuCI Configuration]:   https://github.com/clowwindy/ShadowVPN/wiki/Configure-Via-LuCI-on-OpenWRT
 [Mailing list]:         http://groups.google.com/group/shadowsocks
+[release]:              https://github.com/clowwindy/ShadowVPN/releases
 [SDK]:                  http://wiki.openwrt.org/doc/howto/obtain.firmware.sdk
 [Travis CI]:            https://travis-ci.org/clowwindy/ShadowVPN
