@@ -134,11 +134,11 @@ static int process_key_value(shadowvpn_args_t *args, const char *key,
   } else if (strcmp("concurrency", key) == 0) {
     args->concurrency = atol(value);
     if (args->concurrency == 0) {
-      errf("concurrency should >= 1\n");
+      errf("concurrency should >= 1");
       return -1;
     }
     if (args->concurrency > 100) {
-      errf("concurrency should <= 100\n");
+      errf("concurrency should <= 100");
       return -1;
     }
   } else if (strcmp("password", key) == 0) {
