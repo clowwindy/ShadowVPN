@@ -1,5 +1,5 @@
 /**
-  shadowvpn.h
+  strategy.h
 
   Copyright (c) 2014 clowwindy
 
@@ -23,19 +23,20 @@
 
 */
 
-#ifndef SHADOWVPN_H
-#define SHADOWVPN_H
+#ifndef STRATEGY_H
+#define STRATEGY_H
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "log.h"
-#include "crypto.h"
-#include "args.h"
-#include "daemon.h"
-#include "shell.h"
 #include "vpn.h"
-#include "strategy.h"
+
+// choose a socket by random
+int strategy_choose_socket(vpn_ctx_t *ctx);
+
+// choose a reasonable remote address based on magic
+// update ctx->remote_addr and remote_addrlen
+// return 0 on success
+int strategy_choose_remote_addr(vpn_ctx_t *ctx);
+
+// update remote address list from remote_addr and remote_addrlen
+void strategy_update_remote_addr_list(vpn_ctx_t *ctx);
 
 #endif

@@ -59,7 +59,6 @@
 #include <net/if_tun.h>
 #endif
 
-#include <sodium.h>
 
 /*
  * Darwin & OpenBSD use utun which is slightly
@@ -413,16 +412,11 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
       return -1;
     }
   }
+  if (args->mode == SHADOWVPN_MODE_SERVER) {
+    ctx->known_addrs = calloc(args->concurrency, sizeof(addr_info_t));
+  }
   ctx->args = args;
   return 0;
-}
-
-int choose_client_socket(vpn_ctx_t *ctx) {
-  if (ctx->nsock == 1) {
-    return ctx->socks[0];
-  }
-  uint32_t r = randombytes_uniform(ctx->nsock);
-  return ctx->socks[r];
 }
 
 int vpn_run(vpn_ctx_t *ctx) {
@@ -497,7 +491,15 @@ int vpn_run(vpn_ctx_t *ctx) {
       }
       if (ctx->remote_addrlen) {
         crypto_encrypt(ctx->udp_buf, ctx->tun_buf, r);
-        int sock_to_send = choose_client_socket(ctx);
+
+        // choose remote address for server
+        if (ctx->args->mode == SHADOWVPN_MODE_SERVER) {
+          strategy_choose_remote_addr(ctx);
+        }
+
+        // choose socket (currently only for client)
+        int sock_to_send = strategy_choose_socket(ctx);
+
         r = sendto(sock_to_send, ctx->udp_buf + SHADOWVPN_PACKET_OFFSET,
                    SHADOWVPN_OVERHEAD_LEN + r, 0,
                    ctx->remote_addrp, ctx->remote_addrlen);
@@ -551,6 +553,8 @@ int vpn_run(vpn_ctx_t *ctx) {
             // recv_from
             memcpy(ctx->remote_addrp, &temp_remote_addr, temp_remote_addrlen);
             ctx->remote_addrlen = temp_remote_addrlen;
+            // now we got one client address, update the address list
+            strategy_update_remote_addr_list(ctx);
           }
 
           if (-1 == tun_write(ctx->tun, ctx->tun_buf + SHADOWVPN_ZERO_BYTES,

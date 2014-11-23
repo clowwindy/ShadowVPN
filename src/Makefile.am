@@ -14,6 +14,8 @@ libshadowvpn_la_SOURCES = log.c \
 	crypto.c \
 	shell.h \
 	shell.c \
+	strategy.h \
+	strategy.c \
 	vpn.h \
 	vpn.c \
 	args.h \
