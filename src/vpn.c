@@ -398,7 +398,6 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
   } else {
     // if we are client, we should have multiple sockets for each port
     ctx->nsock = args->concurrency;
-    err("test");
   }
   ctx->socks = calloc(ctx->nsock, sizeof(int));
   for (i = 0; i < ctx->nsock; i++) {
