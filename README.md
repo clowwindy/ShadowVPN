@@ -59,22 +59,7 @@ Or build yourself: cd into [SDK] root, then
 
 #### Windows
 
-You need to install the TUN/TAP driver first:
-* [For 32-bit Windows](http://build.openvpn.net/downloads/releases/tap-windows-9.9.2_3.exe)
-* [For 64-bit Windows](http://build.openvpn.net/downloads/releases/tap-windows-9.21.0.exe)
-
-Currently only MinGW compilers are supported. You can compile in Msys or
-cross-compile in Linux or Cygwin with 32-bit or 64-bit MinGW toolchains.
-
-For example, if using 64-bit Cygwin, install `libtool`, `autoconf`, `git`
-and `mingw64-x86_64-gcc-g++` by Cygwin installer. Then Download a [release]
-and build. Build from Cygwin terminal by the following commands:
-
-    cd ShadowVPN
-    ./configure --enable-static --host=x86_64-w64-mingw32
-    make && make install DESTDIR="$HOME/shadowvpn-build"
-
-Executables will be generated in `$HOME/shadowvpn-build`.
+See [Build for Windows].
 
 Configuration
 -------------
@@ -138,6 +123,7 @@ Bugs and Issues
 
 [Build Status]:         https://travis-ci.org/clowwindy/ShadowVPN.svg?branch=master
 [Build deb Package]:    https://github.com/clowwindy/ShadowVPN/wiki/Building-deb-Package
+[Build for Windows]:    https://github.com/clowwindy/ShadowVPN/wiki/Build-for-Windows
 [Compare]:              https://github.com/clowwindy/ShadowVPN/wiki/Compared-to-Shadowsocks-and-OpenVPN
 [Chinese Readme]:       https://github.com/clowwindy/ShadowVPN/wiki/ShadowVPN-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
 [Download precompiled]: https://github.com/clowwindy/ShadowVPN/releases
