@@ -17,13 +17,14 @@ ifconfig $intf mtu $mtu
 gw_intf=`ip route show | grep '^default' | sed -e 's/.* dev \([^ ]*\).*/\1/'`
 
 # turn on NAT over gw_intf and VPN
-iptables -t nat -A POSTROUTING -o $gw_intf -j MASQUERADE
+if !(iptables-save -t nat | grep -q "$gw_intf (shadowvpn)"); then
+  iptables -t nat -A POSTROUTING -o $gw_intf -m comment --comment "$gw_intf (shadowvpn)" -j MASQUERADE
+fi
 iptables -A FORWARD -i $gw_intf -o $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -A FORWARD -i $intf -o $gw_intf -j ACCEPT
 
 # turn on MSS fix
 # MSS = MTU - TCP header - IP header
-mss=$(($mtu - 40))
-iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss $mss
+iptables -t mangle -A FORWARD -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
 echo $0 done
