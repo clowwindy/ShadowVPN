@@ -26,6 +26,8 @@
 #ifndef VPN_H
 #define VPN_H
 
+#include <time.h>
+
 #ifdef TARGET_WIN32
 #include "win32.h"
 #else
