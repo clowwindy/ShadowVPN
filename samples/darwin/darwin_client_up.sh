@@ -22,7 +22,7 @@ ifconfig $intf $local_tun_ip $remote_tun_ip mtu $mtu netmask 255.255.255.0 up
 echo changing default route
 route add -net 128.0.0.0 $remote_tun_ip -netmask 128.0.0.0
 route add -net 0.0.0.0 $remote_tun_ip -netmask 128.0.0.0
-route add -net $remote_tun_ip -netmask 255.255.255.255 -interface $intf
+route add -net $remote_tun_ip $orig_gw -netmask 255.255.255.255
 echo default route changed to $remote_tun_ip
 
 # change dns server

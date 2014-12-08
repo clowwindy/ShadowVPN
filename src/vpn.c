@@ -446,6 +446,8 @@ int vpn_run(vpn_ctx_t *ctx) {
     FD_SET(ctx->control_fd, &readset);
 #endif
     FD_SET(ctx->tun, &readset);
+
+    max_fd = 0;
     for (i = 0; i < ctx->nsock; i++) {
       FD_SET(ctx->socks[i], &readset);
       max_fd = max(max_fd, ctx->socks[i]);
