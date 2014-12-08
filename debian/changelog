@@ -1,3 +1,9 @@
+shadowvpn (0.1.5-1) unstable; urgency=low
+
+  * Fix select: Invalid argument
+
+ -- clowwindy <clowwindy42@gmail.com>  Mon, 8 Dec 2014 11:43:00 +0800
+
 shadowvpn (0.1.4-1) unstable; urgency=low
 
   * Support connecting server with multiple local ports
