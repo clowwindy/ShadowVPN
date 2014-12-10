@@ -5,19 +5,21 @@ START=90
 STOP=15
 EXTRA_COMMANDS="restart"
 
-boot() {
-    if [ ! -f "/dev/net/tun" ]; then
-        mkdir /dev/net
-        mknod /dev/net/tun c 10 200
-        chmod 0666 /dev/net/tun
-    fi
-}
-
 start()
 {
     shadowvpn \
         -c /etc/shadowvpn/client.conf \
         -s start
+}
+
+boot()
+{
+    if [ ! -c "/dev/net/tun" ]; then
+        mkdir -p /dev/net
+        mknod /dev/net/tun c 10 200
+        chmod 0666 /dev/net/tun
+    fi
+    start
 }
 
 stop()
