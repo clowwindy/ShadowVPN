@@ -160,6 +160,12 @@ static int process_key_value(shadowvpn_args_t *args, const char *key,
       errf("MTU %ld is too small", mtu);
       return -1;
     }
+    // RFC 2460
+    // IPv6 requires an MTU of 1280 at least
+    if (mtu < 1280 + SHADOWVPN_OVERHEAD_LEN) {
+      errf("warning: if you are using ipv6, you should set MTU greater than %ld",
+              1280 + SHADOWVPN_OVERHEAD_LEN);
+    }
     if (mtu > MAX_MTU) {
       errf("MTU %ld is too large", mtu);
       return -1;
