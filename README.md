@@ -44,8 +44,7 @@ Make sure to set `--sysconfdir=/etc`. You'll find conf files under `/etc`.
 
 #### OpenWRT
 
-[Download precompiled] for OpenWRT trunk and CPU: ar71xx, brcm63xx, brcm47xx,
-ramips_24kec.
+[Download precompiled] for OpenWRT Barrier Breaker.
 
 Or build yourself: cd into [SDK] root, then
 
