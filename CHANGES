@@ -1,3 +1,6 @@
+0.1.6 2015-01-25
+- Call setsid and ignore SIGHUP in daemon mode
+
 0.1.5 2014-12-08
 - Fix select: Invalid argument
 
