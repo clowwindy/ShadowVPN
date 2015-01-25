@@ -1,8 +1,14 @@
+shadowvpn (0.1.6-1) unstable; urgency=low
+
+  * Call setsid and ignore SIGHUP in daemon mode
+
+ -- clowwindy <clowwindy42@gmail.com>  Sun, 25 Jan 2015 21:46:22 +0800
+
 shadowvpn (0.1.5-1) unstable; urgency=low
 
   * Fix select: Invalid argument
 
- -- clowwindy <clowwindy42@gmail.com>  Mon, 8 Dec 2014 11:43:00 +0800
+ -- clowwindy <clowwindy42@gmail.com>  Mon, 08 Dec 2014 11:43:00 +0800
 
 shadowvpn (0.1.4-1) unstable; urgency=low
 
