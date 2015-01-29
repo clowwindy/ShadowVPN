@@ -9,29 +9,16 @@
 # uncomment if you want to turn off IP forwarding
 # sysctl -w net.ipv4.ip_forward=0
 
-# get old gateway
-echo reading old gateway from /tmp/old_gw_intf
-old_gw_ip=`cat /tmp/old_gw_ip` && old_gw_intf=`cat /tmp/old_gw_intf`
-rm -f /tmp/old_gw_intf /tmp/old_gw_ip
-if [ -z "$old_gw_intf" ]; then
-  echo "can not read gateway, check up.sh"
-  exit 1
-fi
-
 # turn off NAT over VPN
 iptables -t nat -D POSTROUTING -o $intf -j MASQUERADE
 iptables -D FORWARD -i $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -D FORWARD -o $intf -j ACCEPT
 
 # change routing table
-echo changing default route
-route del $server $old_gw_intf
-route del default
-if [ pppoe-wan = "$old_gw_intf" ]; then
-  route add default $old_gw_intf
-else
-  route add default gw $old_gw_ip
-fi
-echo default route changed to $old_gw_intf
+echo rollback the default route
+ip route del $server
+ip route del 0.0.0.0/1
+ip route del 128.0.0.0/1
+echo default route changed to original route
 
 echo $0 done

@@ -14,20 +14,8 @@ ifconfig $intf 10.7.0.2 netmask 255.255.255.0
 ifconfig $intf mtu $mtu
 
 # get current gateway
-echo reading old gateway from route table
-old_gw_intf=`ip route show | grep '^default' | sed -e 's/.* dev \([^ ]*\).*/\1/'`
-old_gw_ip=`ip route show | grep '^default' | sed -e 's/.* via \([^ ]*\).*/\1/'`
-
-# if current gateway is tun, it indicates that our gateway is already changed
-# read from saved file
-if [ "$old_gw_intf" = "$intf" ]; then
-  echo reading old gateway from /tmp/old_gw_intf
-  old_gw_intf=`cat /tmp/old_gw_intf` || ( echo "can not read gateway, check up.sh" && exit 1 )
-fi
-
-echo saving old gateway to /tmp/old_gw_intf
-echo $old_gw_intf > /tmp/old_gw_intf
-echo $old_gw_ip > /tmp/old_gw_ip
+echo get the original default gateway
+gateway=$(ip route show 0/0 | grep via | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}')
 
 # turn on NAT over VPN
 iptables -t nat -A POSTROUTING -o $intf -j MASQUERADE
@@ -35,14 +23,10 @@ iptables -I FORWARD 1 -i $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -I FORWARD 1 -o $intf -j ACCEPT
 
 # change routing table
-echo changing default route
-if [ pppoe-wan = "$old_gw_intf" ]; then
-  route add $server $old_gw_intf
-else
-  route add $server gw $old_gw_ip
-fi
-route del default
-route add default gw 10.7.0.1
+echo override the default route
+ip route add $server via $gateway
+ip route add 0.0.0.0/1 via 10.7.0.1
+ip route add 128.0.0.0/1 via 10.7.0.1
 echo default route changed to 10.7.0.1
 
 echo $0 done
