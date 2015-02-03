@@ -1,6 +1,6 @@
 EXTRA_DIST = \
 	autogen.sh \
 	README.md \
-	LICENSE
+	COPYING
 
 SUBDIRS = src samples
