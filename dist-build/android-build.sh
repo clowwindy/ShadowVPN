@@ -28,7 +28,7 @@ export PATH="${PATH}:${TOOLCHAIN_DIR}/bin"
 rm -rf "${TOOLCHAIN_DIR}" "${PREFIX}"
 
 $MAKE_TOOLCHAIN --platform="${NDK_PLATFORM:-android-14}" \
-                --arch="$TARGET_ARCH" \
+                --arch="$TARCH" \
                 --install-dir="$TOOLCHAIN_DIR" && \
 ./configure --host="${HOST_COMPILER}" \
             --with-sysroot="${TOOLCHAIN_DIR}/sysroot" \
