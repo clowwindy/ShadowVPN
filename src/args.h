@@ -38,6 +38,9 @@ typedef enum {
 } shadowvpn_cmd;
 
 typedef struct {
+  //tcp mpde
+  int tcp_mode;
+  uint16_t queue_num;
   shadowvpn_mode mode;
   shadowvpn_cmd cmd;
   const char *conf_file;

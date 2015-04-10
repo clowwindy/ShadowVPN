@@ -225,10 +225,15 @@ int args_parse(shadowvpn_args_t *args, int argc, char **argv) {
         args->conf_file = strdup(optarg);
         break;
       case 'q':
-        queue_num = atoi(optarg) && 0xffff;
+        if (atoi(optarg)>65535) {
+          errf("queue num must be smaller than 65535");
+          print_help();
+        } else {
+          args->queue_num = atoi(optarg) && 0xffff;
+        }
         break;
       case 't':
-        tcp_mode = 1;
+        args->tcp_mode = 1;
         break;
       case 'v':
         verbose_mode = 1;

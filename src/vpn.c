@@ -99,8 +99,6 @@
 
 #endif
 //queue
-int tcp_mode;
-uint16_t queue_num;
 struct nfq_handle *h;
 struct nfq_q_handle *qh;
 int is_ipv6;
@@ -400,8 +398,6 @@ int set_nonblock(int sock) {
   return -1;
 }
 
-
-
 #ifndef TARGET_WIN32
 static int max(int a, int b) {
   return a > b ? a : b;
@@ -426,46 +422,36 @@ int cb(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
 }
 
 
-int queue_alloc(void *ctx) {
-
-  int sock;
+int queue_alloc(void *ctx, uint16_t queue_num) {
   uint16_t ai_family;
 
   if (is_ipv6)
     ai_family = AF_INET6;
   else
     ai_family = AF_INET;
-
   h = nfq_open();
   if (!h) {
     errf("error during nfq_open()\n");
     return -1;
   }
-
   if (nfq_unbind_pf(h, ai_family) < 0) {
     err("error during nfq_unbind_pf()\n");
     return -1;
   }
-
   if (nfq_bind_pf(h, ai_family) < 0) {
     err("error during nfq_bind_pf()\n");
     return -1;
   }
-
   qh = nfq_create_queue(h, queue_num, &cb, ctx);
   if (!qh) {
     err("error during nfq_create_queue()\n");
     return -1;
   }
-
   if (nfq_set_mode(qh, NFQNL_COPY_PACKET, 0xffff) < 0) {
     err("can't set packet_copy mode\n");
     return -1;
   }
-
-  sock = nfq_fd(h);
-
-  return set_nonblock(sock);
+  return set_nonblock(nfq_fd(h));
 }
 
 int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
@@ -518,7 +504,7 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
     return -1;
   }
 #endif
-  if (!tcp_mode) {
+  if (!args->tcp_mode) {
     if (args->mode == SHADOWVPN_MODE_SERVER) {
       ctx->nsock = 1;
     } else {
@@ -549,7 +535,7 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
         close(ctx->tun);
         return -1;
     }
-    ctx->q_sock = queue_alloc(ctx);
+    ctx->q_sock = queue_alloc(ctx, args->queue_num);
     if (ctx->q_sock == -1) {
         errf("failed to create queue");
         close(ctx->tun);
@@ -566,7 +552,7 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
 
 int vpn_run(vpn_ctx_t *ctx) {
   fd_set readset;
-  int max_fd = 0, i;
+  int max_fd = 0, i, isv6 = is_ipv6, is_tcp = ctx->args->tcp_mode;
   ssize_t r;
   uint32_t rand = 314159265;
   uint16_t c_port, s_port = htons(ctx->args->port); //client port & server port
@@ -588,7 +574,7 @@ int vpn_run(vpn_ctx_t *ctx) {
   bzero(ctx->tun_buf, SHADOWVPN_ZERO_BYTES);
   bzero(ctx->udp_buf, SHADOWVPN_ZERO_BYTES);
 
-  if (tcp_mode) {
+  if (is_tcp) {
     tcphdr = (struct tcphdr*)ctx->udp_buf;
     four = 4;
   }
@@ -605,7 +591,7 @@ int vpn_run(vpn_ctx_t *ctx) {
     FD_SET(ctx->tun, &readset);
 
     max_fd = 0;
-    if (!tcp_mode) {
+    if (!is_tcp) {
       for (i = 0; i < ctx->nsock; i++) {
         FD_SET(ctx->socks[i], &readset);
         max_fd = max(max_fd, ctx->socks[i]);
@@ -653,7 +639,7 @@ int vpn_run(vpn_ctx_t *ctx) {
         }
       }
       if (ctx->remote_addrlen) {
-        if (tcp_mode){
+        if (is_tcp){
           int a;
           for (a = 0; a< 32; a++)
             *(ctx->udp_buf + a + 12) = 0;
@@ -667,7 +653,7 @@ int vpn_run(vpn_ctx_t *ctx) {
 
         // choose socket (currently only for client)
         int sock_to_send = strategy_choose_socket(ctx);
-        if (tcp_mode) {
+        if (is_tcp) {
           if(ctx->args->mode == SHADOWVPN_MODE_SERVER) {
             tcphdr->source = s_port;
             tcphdr->dest = c_port;
@@ -698,7 +684,7 @@ int vpn_run(vpn_ctx_t *ctx) {
     }
     for (i = 0; i < ctx->nsock; i++) {
       int sock;
-      if (!tcp_mode) {
+      if (!is_tcp) {
         sock = ctx->socks[i];
       } else {
         sock = ctx->q_sock;
@@ -708,7 +694,7 @@ int vpn_run(vpn_ctx_t *ctx) {
         struct sockaddr_storage temp_remote_addr;
         socklen_t temp_remote_addrlen = sizeof(temp_remote_addr);
         int decrypt;
-        if (!tcp_mode) {
+        if (!is_tcp) {
           r = recvfrom(sock, ctx->udp_buf + SHADOWVPN_PACKET_OFFSET,
                       SHADOWVPN_OVERHEAD_LEN + ctx->args->mtu, 0,
                       (struct sockaddr *)&temp_remote_addr,
@@ -732,13 +718,13 @@ int vpn_run(vpn_ctx_t *ctx) {
         if (r == 0)
           continue;
 
-        if (!tcp_mode) {
+        if (!is_tcp) {
           decrypt = crypto_decrypt(ctx->tun_buf, ctx->udp_buf,
                                 r - SHADOWVPN_OVERHEAD_LEN);
           r -= SHADOWVPN_OVERHEAD_LEN;
         } else {
           nfq_handle_packet(h, ctx->udp_buf, r);
-          if ((*(ctx->data) & 0xff) == 69) {
+          if (!isv6) {
             decrypt = crypto_decrypt(ctx->tun_buf, ctx->data + 32,
                                   ctx->rv - SHADOWVPN_OVERHEAD_LEN - 40);
             r = ctx->rv - SHADOWVPN_OVERHEAD_LEN - 40;
@@ -755,8 +741,8 @@ int vpn_run(vpn_ctx_t *ctx) {
           if (ctx->args->mode == SHADOWVPN_MODE_SERVER) {
             // if we are running a server, update server address from
             // recv_from
-            if (tcp_mode) {
-              if (*(ctx->data) == 69) {
+            if (is_tcp) {
+              if (!isv6) {
                 struct sockaddr_in *temp = (struct sockaddr_in *)(ctx->remote_addrp);
                 temp->sin_family = AF_INET;
                 temp->sin_addr.s_addr = ((struct iphdr *)(ctx->data))->saddr;

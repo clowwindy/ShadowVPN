@@ -36,8 +36,6 @@
 //queue support
 #include <linux/netfilter.h>    /* for NF_ACCEPT */
 #include <libnetfilter_queue/libnetfilter_queue.h>
-extern int tcp_mode;
-extern uint16_t queue_num;
 
 /* the structure to store known client addresses for the server */
 typedef struct {
@@ -81,7 +79,7 @@ typedef struct {
 uint32_t xorshift32(uint32_t *a);
 int vpn_raw_alloc(const char *host, int port,
                   struct sockaddr *addr, socklen_t* addrlen);
-int queue_alloc(void *ctx);
+int queue_alloc(void *ctx, uint16_t queue_num);
 int set_nonblock(int sock);
 int cb(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
         struct nfq_data *nfa, void *data);

@@ -22,6 +22,11 @@ iptables -t nat -A POSTROUTING -o $intf -j MASQUERADE
 iptables -I FORWARD 1 -i $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -I FORWARD 1 -o $intf -j ACCEPT
 
+#put packet to queue
+if [ "$tcp_mode" = 1 ]; then
+	iptables -A INPUT -p tcp --sport $port -j NFQUEUE --queue-num $queue_num
+fi
+
 # change routing table
 echo override the default route
 ip route add $server via $gateway

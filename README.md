@@ -100,6 +100,13 @@ Client(OpenWRT):
     /etc/init.d/shadowvpn start
     /etc/init.d/shadowvpn stop
 
+TCP mode:
+
+    sudo shadowvpn -c /etc/shadowvpn/server.conf -s start -t -q 0
+    sudo shadowvpn -c /etc/shadowvpn/server.conf -s stop -t -q 0
+
+Use "-t" to enable TCP mode, and "-q" to specify queue to bind(the default is 0).
+
 You can also read [LuCI Configuration].
 
 Wiki
