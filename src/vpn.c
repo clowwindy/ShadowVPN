@@ -55,9 +55,9 @@
 #endif
 
 //queue
-#include <linux/tcp.h>
-#include <linux/ipv6.h>
-#include <linux/ip.h>
+#include <netinet/tcp.h>
+#include <netinet/ip6.h>
+#include <netinet/ip.h>
 #include <linux/netfilter.h>    /* for NF_ACCEPT */
 #include <libnetfilter_queue/libnetfilter_queue.h>
 
@@ -661,6 +661,7 @@ int vpn_run(vpn_ctx_t *ctx) {
             tcphdr->dest = s_port;
             tcphdr->source = (uint16_t) xorshift32(&rand);
           }
+          tcphdr->seq = rand;
           tcphdr->syn = 1; //must be a syn packet
           tcphdr->doff = 5;
         }
@@ -751,7 +752,7 @@ int vpn_run(vpn_ctx_t *ctx) {
               } else {
                 struct sockaddr_in6 *temp = (struct sockaddr_in6 *)(ctx->remote_addrp);
                 temp->sin6_family = AF_INET6;
-                memcpy(temp->sin6_addr.s6_addr, ((struct ipv6hdr *)(ctx->data))->saddr.s6_addr, 16);
+                memcpy(temp->sin6_addr.s6_addr, ((struct ip6_hdr *)(ctx->data))->ip6_src.s6_addr, 16);
                 c_port = ((struct tcphdr *)(ctx->data + 40))->source;
                 ctx->remote_addrlen = sizeof(struct sockaddr_in6);
               }
