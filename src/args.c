@@ -230,10 +230,14 @@ int args_parse(shadowvpn_args_t *args, int argc, char **argv) {
           print_help();
         } else {
           args->queue_num = atoi(optarg) && 0xffff;
+          if (-1 == setenv("queue_num", optarg, 1))
+            err("setenv");
         }
         break;
       case 't':
         args->tcp_mode = 1;
+        if (-1 == setenv("tcp_mode", "1", 1))
+          err("setenv");
         break;
       case 'v':
         verbose_mode = 1;
