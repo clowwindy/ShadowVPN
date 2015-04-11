@@ -229,7 +229,7 @@ int args_parse(shadowvpn_args_t *args, int argc, char **argv) {
           errf("queue num must be smaller than 65535");
           print_help();
         } else {
-          args->queue_num = atoi(optarg) && 0xffff;
+          args->queue_num = atoi(optarg);
           if (-1 == setenv("queue_num", optarg, 1))
             err("setenv");
         }
