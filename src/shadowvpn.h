@@ -31,6 +31,5 @@
 #include "daemon.h"
 #include "shell.h"
 #include "vpn.h"
-#include "strategy.h"
 
 #endif

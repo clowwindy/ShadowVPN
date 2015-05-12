@@ -36,8 +36,8 @@ int crypto_decrypt(unsigned char *m, unsigned char *c,
                    unsigned long long clen);
 
 #define SHADOWVPN_KEY_LEN 32
-#define SHADOWVPN_ZERO_BYTES 32
+#define SHADOWVPN_ZERO_BYTES 40
 #define SHADOWVPN_OVERHEAD_LEN 24
-#define SHADOWVPN_PACKET_OFFSET 8
+//#define SHADOWVPN_PACKET_OFFSET 20
 
 #endif

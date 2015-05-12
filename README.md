@@ -1,6 +1,6 @@
 ShadowVPN
 =========
-
+TCP Fake Header Mode Only!!
 [![Build Status]][Travis CI]
 
 [中文说明][Chinese Readme]

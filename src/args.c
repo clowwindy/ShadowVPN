@@ -18,7 +18,6 @@
 
 */
 
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <getopt.h>
@@ -126,16 +125,6 @@ static int process_key_value(shadowvpn_args_t *args, const char *key,
     args->server = strdup(value);
   } else if (strcmp("port", key) == 0) {
     args->port = atol(value);
-  } else if (strcmp("concurrency", key) == 0) {
-    args->concurrency = atol(value);
-    if (args->concurrency == 0) {
-      errf("concurrency should >= 1");
-      return -1;
-    }
-    if (args->concurrency > 100) {
-      errf("concurrency should <= 100");
-      return -1;
-    }
   } else if (strcmp("password", key) == 0) {
     args->password = strdup(value);
   } else if (strcmp("mode", key) == 0) {
@@ -192,10 +181,9 @@ static void load_default_args(shadowvpn_args_t *args) {
 #else
   args->intf = "tun0";
 #endif
-  args->mtu = 1440;
+  args->mtu = 1428;
   args->pid_file = "/var/run/shadowvpn.pid";
   args->log_file = "/var/log/shadowvpn.log";
-  args->concurrency = 1;
 #ifdef TARGET_WIN32
   args->tun_mask = 24;
   args->tun_port = TUN_DELEGATE_PORT;
@@ -205,7 +193,7 @@ static void load_default_args(shadowvpn_args_t *args) {
 int args_parse(shadowvpn_args_t *args, int argc, char **argv) {
   int ch;
   bzero(args, sizeof(shadowvpn_args_t));
-  while ((ch = getopt(argc, argv, "hs:c:v")) != -1) {
+  while ((ch = getopt(argc, argv, "hs:c:q:tv")) != -1) {
     switch (ch) {
       case 's':
         if (strcmp("start", optarg) == 0)

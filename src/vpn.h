@@ -33,17 +33,14 @@
 #endif
 #include "args.h"
 
-/* the structure to store known client addresses for the server */
-typedef struct {
-  struct sockaddr_storage addr;
-  socklen_t addrlen;
-  time_t last_recv_time;
-} addr_info_t;
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]) + __must_be_array(arr))
+#define __must_be_array(a) BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0]))
+#define __same_type(a, b) __builtin_types_compatible_p(typeof(a), typeof(b))
+#define BUILD_BUG_ON_ZERO(e) (sizeof(struct { int:-!!(e); }))
 
 typedef struct {
   int running;
-  int nsock;
-  int *socks;
+  int sock;
   int tun;
   /* select() in winsock doesn't support file handler */
 #ifndef TARGET_WIN32
@@ -54,19 +51,17 @@ typedef struct {
   socklen_t control_addrlen;
   HANDLE cleanEvent;
 #endif
-  unsigned char *tun_buf;
-  unsigned char *udp_buf;
-
-  /* known client addrs for the server */
-  int nknown_addr;
-  addr_info_t *known_addrs;
-
   /* the address we currently use */
   struct sockaddr_storage remote_addr;
-  struct sockaddr *remote_addrp;
   socklen_t remote_addrlen;
   shadowvpn_args_t *args;
 } vpn_ctx_t;
+
+uint32_t xorshift32(uint32_t *a);
+int vpn_raw_alloc(int is_server, const char *host, int port,
+                  struct sockaddr *addr, socklen_t* addrlen);
+
+int set_nonblock(int sock);
 
 /* return -1 on error. no need to destroy any resource */
 int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args);

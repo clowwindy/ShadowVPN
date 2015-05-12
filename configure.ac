@@ -4,6 +4,7 @@
 AC_PREREQ([2.65])
 AC_INIT([shadowvpn],[0.1.6],[clowwindy42@gmail.com])
 AC_CONFIG_AUX_DIR([.])
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([config.h])
@@ -12,8 +13,6 @@ AM_INIT_AUTOMAKE([1.11 dist-bzip2 tar-ustar foreign subdir-objects])
 
 # Checks for programs.
 AC_PROG_CC
-AC_PROG_CXX
-AC_PROG_RANLIB
 AC_PROG_INSTALL
 LT_INIT
 
