@@ -603,33 +603,31 @@ int vpn_run(vpn_ctx_t *ctx) {
           break;
         }
       }
-      if (remote_addrlen) {
-        crypto_encrypt(tcp_buf + 12, tun_buf, r);
-        if (is_server) {
-          tcphdr->source = s_port;
-          tcphdr->dest = c_port;
-        } else {
-          tcphdr->dest = s_port;
-          tcphdr->source = (uint16_t) xorshift32(&rand);
-        }
-        tcphdr->seq = rand;
+      crypto_encrypt(tcp_buf + 12, tun_buf, r);
+      if (is_server) {
+        tcphdr->source = s_port;
+        tcphdr->dest = c_port;
+        tcphdr->fin = 1; //avoid report syn flood
+      } else {
+        tcphdr->dest = s_port;
+        tcphdr->source = (uint16_t) xorshift32(&rand);
         tcphdr->syn = 1; //must be a syn packet
-        tcphdr->doff = 5;
-        r = sendto(sock, tcp_buf,
-                   SHADOWVPN_OVERHEAD_LEN + r + 20, 0,
-                   remote_addrp, remote_addrlen);
-        if (r == -1) {
-          if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            // do nothing
-          } else if (errno == ENETUNREACH || errno == ENETDOWN ||
-                     errno == EPERM || errno == EINTR || errno == EMSGSIZE) {
-            // just log, do nothing
-            err("sendto");
-          } else {
-            err("sendto");
-            // TODO rebuild socket
-            break;
-          }
+      }
+      tcphdr->seq = rand;
+      tcphdr->doff = 5;
+      r = sendto(sock, tcp_buf, SHADOWVPN_OVERHEAD_LEN + r + 20, 0,
+                 remote_addrp, remote_addrlen);
+      if (r == -1) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+          // do nothing
+        } else if (errno == ENETUNREACH || errno == ENETDOWN ||
+                   errno == EPERM || errno == EINTR || errno == EMSGSIZE) {
+          // just log, do nothing
+          err("sendto");
+        } else {
+          err("sendto");
+          // TODO rebuild socket
+          break;
         }
       }
     }
