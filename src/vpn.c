@@ -607,7 +607,7 @@ int vpn_run(vpn_ctx_t *ctx) {
       if (is_server) {
         tcphdr->source = s_port;
         tcphdr->dest = c_port;
-        tcphdr->fin = 1; //avoid report syn flood
+        tcphdr->ack = 1; //avoid report syn flood
       } else {
         tcphdr->dest = s_port;
         tcphdr->source = (uint16_t) xorshift32(&rand);
