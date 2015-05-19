@@ -524,7 +524,7 @@ int vpn_run(vpn_ctx_t *ctx) {
   logf("VPN started");
 
   fd_set readset;
-  int max_fd = 0, isv6 = is_ipv6;
+  int isv6 = is_ipv6;
   ssize_t r;
   uint32_t rand = 314159265;
   uint16_t c_port, s_port = htons(ctx->args->port); //client port & server port
@@ -554,6 +554,10 @@ int vpn_run(vpn_ctx_t *ctx) {
   bzero(tcp_buf, SHADOWVPN_ZERO_BYTES);
 
   int is_server = (ctx->args->mode == SHADOWVPN_MODE_SERVER)? 1 : 0;
+  // we assume that pipe fd is always less than tun and sock fd which are
+  // created later
+  int max_fd = sock;
+  max_fd = max(tun, max_fd) + 1;
 
   while (ctx->running) {
     FD_ZERO(&readset);
@@ -565,11 +569,6 @@ int vpn_run(vpn_ctx_t *ctx) {
     FD_SET(tun, &readset);
 
     FD_SET(sock, &readset);
-    max_fd = max(max_fd, sock);
-
-    // we assume that pipe fd is always less than tun and sock fd which are
-    // created later
-    max_fd = max(tun, max_fd) + 1;
 
     if (-1 == select(max_fd, &readset, NULL, NULL, NULL)) {
       if (errno == EINTR)
