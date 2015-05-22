@@ -14,7 +14,7 @@ ifconfig $intf 10.7.0.1 netmask 255.255.255.0
 ifconfig $intf mtu $mtu
 
 # get default gateway
-gw_intf=`ip route show | grep '^default' | sed -e 's/.* dev \([^ ]*\).*/\1/'`
+gw_intf=`ip route show | grep '^default' | head -n1 | sed -e 's/.* dev \([^ ]*\).*/\1/'`
 
 # turn on NAT over gw_intf and VPN
 if !(iptables-save -t nat | grep -q "$gw_intf (shadowvpn)"); then
