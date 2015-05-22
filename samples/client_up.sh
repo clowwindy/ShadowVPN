@@ -15,7 +15,7 @@ ifconfig $intf mtu $mtu
 
 # get current gateway
 echo get the original default gateway
-gateway=$(ip route show 0/0 | grep via | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}')
+gateway=$(ip route show 0/0 | grep via | head -n1 | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}')
 
 # turn on NAT over VPN
 iptables -t nat -A POSTROUTING -o $intf -j MASQUERADE
