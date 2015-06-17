@@ -10,5 +10,5 @@ Vcs-Browser: https://github.com/clowwindy/ShadowVPN
 
 Package: shadowvpn
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, iproute2, iptables
 Description: A fast, safe VPN based on libsodium
