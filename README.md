@@ -20,7 +20,7 @@ Install
 
 For Debian 7 and Ubuntu 12+, add the following line to `/etc/apt/sources.list`
 
-    deb https://shadowvpn.org/debian wheezy main
+    deb http://shadowvpn.org/debian wheezy main
 
 Then
 
