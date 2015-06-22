@@ -27,4 +27,9 @@ iptables -A FORWARD -i $intf -o $gw_intf -j ACCEPT
 # MSS = MTU - TCP header - IP header
 iptables -t mangle -A FORWARD -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
+#put packet to queue
+if [ "$tcp_mode" = 1 ]; then
+	iptables -A INPUT -p tcp --dport $port -j NFQUEUE --queue-num $queue_num
+fi
+
 echo $0 done

@@ -31,6 +31,8 @@ static const char *help_message =
 "  -s start/stop/restart control shadowvpn process. if omitted, will run\n"
 "                        in foreground\n"
 "  -c config_file        path to config file\n"
+"  -t                    TCP mode(fake tcp header)\n"
+"  -q                    queue to bind (<65535)\n"
 "  -v                    verbose logging\n"
 "\n"
 "Online help: <https://github.com/clowwindy/ShadowVPN>\n";
@@ -205,7 +207,7 @@ static void load_default_args(shadowvpn_args_t *args) {
 int args_parse(shadowvpn_args_t *args, int argc, char **argv) {
   int ch;
   bzero(args, sizeof(shadowvpn_args_t));
-  while ((ch = getopt(argc, argv, "hs:c:v")) != -1) {
+  while ((ch = getopt(argc, argv, "hs:c:q:tv")) != -1) {
     switch (ch) {
       case 's':
         if (strcmp("start", optarg) == 0)
@@ -221,6 +223,21 @@ int args_parse(shadowvpn_args_t *args, int argc, char **argv) {
         break;
       case 'c':
         args->conf_file = strdup(optarg);
+        break;
+      case 'q':
+        if (atoi(optarg)>65535) {
+          errf("queue num must be smaller than 65535");
+          print_help();
+        } else {
+          args->queue_num = atoi(optarg);
+          if (-1 == setenv("queue_num", optarg, 1))
+            err("setenv");
+        }
+        break;
+      case 't':
+        args->tcp_mode = 1;
+        if (-1 == setenv("tcp_mode", "1", 1))
+          err("setenv");
         break;
       case 'v':
         verbose_mode = 1;

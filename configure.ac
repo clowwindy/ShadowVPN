@@ -45,6 +45,8 @@ case "$host" in
         AC_DEFINE([TARGET_UNKNOWN], [1], [Unknown platform ?])
 esac
 
+AC_CHECK_LIB(netfilter_queue, nfq_create_queue,, [AC_MSG_ERROR([libnetfilter_queue not found])])
+
 AM_CONDITIONAL([WIN32], [test "${WIN32}" = "yes"])
 AC_CHECK_HEADER([android/log.h],[CFLAGS="$CFLAGS -DHAVE_ANDROID_LOG"; LDFLAGS="$LDFLAGS -llog"],[],[])
 

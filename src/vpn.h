@@ -33,6 +33,10 @@
 #endif
 #include "args.h"
 
+//queue support
+#include <linux/netfilter.h>    /* for NF_ACCEPT */
+#include <libnetfilter_queue/libnetfilter_queue.h>
+
 /* the structure to store known client addresses for the server */
 typedef struct {
   struct sockaddr_storage addr;
@@ -46,6 +50,10 @@ typedef struct {
   int *socks;
   int tun;
   /* select() in winsock doesn't support file handler */
+  //queue support
+  int q_sock;
+  int rv;
+  unsigned char *data;
 #ifndef TARGET_WIN32
   int control_pipe[2];
 #else
@@ -67,6 +75,14 @@ typedef struct {
   socklen_t remote_addrlen;
   shadowvpn_args_t *args;
 } vpn_ctx_t;
+
+uint32_t xorshift32(uint32_t *a);
+int vpn_raw_alloc(const char *host, int port,
+                  struct sockaddr *addr, socklen_t* addrlen);
+int queue_alloc(void *ctx, uint16_t queue_num);
+int set_nonblock(int sock);
+int cb(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
+        struct nfq_data *nfa, void *data);
 
 /* return -1 on error. no need to destroy any resource */
 int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args);

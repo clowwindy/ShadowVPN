@@ -14,6 +14,11 @@ iptables -t nat -D POSTROUTING -o $intf -j MASQUERADE
 iptables -D FORWARD -i $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -D FORWARD -o $intf -j ACCEPT
 
+#NFQUEUE
+if [ "$tcp_mode" = 1 ]; then
+	iptables -D INPUT -p tcp --sport $port -j NFQUEUE --queue-num $queue_num
+fi
+
 # change routing table
 echo rollback the default route
 ip route del $server
