@@ -60,6 +60,14 @@ Or build yourself: cd into [SDK] root, then
 
 See [Build for Windows].
 
+#### iOS
+
+Work in progress. See [iOS]
+
+#### Android
+
+See [Android]
+
 Configuration
 -------------
 
@@ -134,6 +142,7 @@ Bugs and Issues
 - [Mailing list]
 
 
+[Android]:              https://github.com/clowwindy/ShadowVPNAndroid
 [Build Status]:         https://travis-ci.org/clowwindy/ShadowVPN.svg?branch=master
 [Build deb Package]:    https://github.com/clowwindy/ShadowVPN/wiki/Building-deb-Package
 [Build for Windows]:    https://github.com/clowwindy/ShadowVPN/wiki/Build-for-Windows
@@ -141,6 +150,7 @@ Bugs and Issues
 [Chinese Readme]:       https://github.com/clowwindy/ShadowVPN/wiki/ShadowVPN-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
 [Download precompiled]: https://github.com/clowwindy/ShadowVPN/releases
 [FAQ]:                  https://github.com/clowwindy/ShadowVPN/wiki/FAQ
+[iOS]:                  https://github.com/clowwindy/ShadowVPNiOS
 [Issue Tracker]:        https://github.com/clowwindy/ShadowVPN/issues?state=open
 [LuCI Configuration]:   https://github.com/clowwindy/ShadowVPN/wiki/Configure-Via-LuCI-on-OpenWRT
 [Mailing list]:         http://groups.google.com/group/shadowsocks
