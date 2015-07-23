@@ -181,7 +181,8 @@ static int process_key_value(shadowvpn_args_t *args, const char *key,
   }
 #endif
   else {
-    errf("warning: unknown key in config file: %s", key);
+    errf("warning: config key %s not recognized by shadowvpn, will be "
+         "passed to shell scripts anyway", key);
   }
   return 0;
 }
