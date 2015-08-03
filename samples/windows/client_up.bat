@@ -6,9 +6,9 @@ REM all key value pairs in ShadowVPN config file will be passed to this script
 REM as environment variables, except password
 
 REM user-defined variables
-SET remote_tun_ip=10.7.0.1
+SET remote_tun_ip=10.7.0.0
 SET dns_server=8.8.8.8
-SET orig_intf="Local Area Connection"
+SET orig_intf="Ethernet"
 
 REM exclude remote server in routing table
 for /F "tokens=3" %%* in ('route print ^| findstr "\<0.0.0.0\>"') do set "orig_gw=%%*"
@@ -34,5 +34,6 @@ ECHO default route changed to %remote_tun_ip%
 
 REM change dns server
 netsh interface ip set dns name="%intf%" static %dns_server% > NUL
+netsh interface ip set dns name="%orig_intf%" static %dns_server% > NUL
 
 ECHO %0 done
