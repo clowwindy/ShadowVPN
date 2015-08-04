@@ -13,7 +13,7 @@ ip link set $intf mtu $mtu
 ip link set $intf up
 
 # Get default gateway interface
-gw_intf=$(ip route show 0/0 | awk '{print $3}')
+gw_intf=$(ip route show 0/0 | awk '{print $5}')
 
 # turn on NAT over gw_intf and VPN
 if !(iptables-save -t nat | grep -q "$gw_intf (shadowvpn)"); then
