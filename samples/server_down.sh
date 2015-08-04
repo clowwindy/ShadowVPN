@@ -8,7 +8,7 @@
 #sysctl -w net.ipv4.ip_forward=0
 
 # Get default gateway interface
-gw_intf=$(ip route show 0/0 | awk '{print $3}')
+gw_intf=$(ip route show 0/0 | awk '{print $5}')
 
 # Turn off NAT over default gateway interface and VPN
 iptables -t nat -D POSTROUTING -o $gw_intf -m comment --comment "$gw_intf (shadowvpn)" -j MASQUERADE
