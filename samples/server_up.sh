@@ -11,15 +11,12 @@ sysctl -w net.ipv4.ip_forward=1
 ip addr add $net dev $intf
 ip link set $intf mtu $mtu
 
-# Get default gateway interface
-gw_intf=$(ip route show 0/0 | awk '{print $5}')
-
-# turn on NAT over gw_intf and VPN
-if !(iptables-save -t nat | grep -q "$gw_intf (shadowvpn)"); then
-  iptables -t nat -A POSTROUTING -o $gw_intf -m comment --comment "$gw_intf (shadowvpn)" -j MASQUERADE
+# turn on NAT over VPN
+if !(iptables-save -t nat | grep -q "shadowvpn"); then
+  iptables -t nat -A POSTROUTING -s $net ! -d $net -m comment --comment "shadowvpn" -j MASQUERADE
 fi
-iptables -A FORWARD -i $gw_intf -o $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A FORWARD -i $intf -o $gw_intf -j ACCEPT
+iptables -A FORWARD -s $net -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -d $net -j ACCEPT
 
 # Turn on MSS fix (MSS = MTU - TCP header - IP header)
 iptables -t mangle -A FORWARD -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
