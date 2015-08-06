@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.65])
-AC_INIT([shadowvpn],[0.1.6],[clowwindy42@gmail.com])
+AC_INIT([shadowvpn],[0.1.7],[clowwindy42@gmail.com])
 AC_CONFIG_AUX_DIR([.])
 
 AC_CONFIG_SRCDIR([src/main.c])
