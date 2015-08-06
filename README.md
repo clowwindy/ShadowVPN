@@ -16,6 +16,17 @@ please come by here a few months later.
 Install
 -------
 
+#### Debian & Ubuntu
+
+For Debian 7 and Ubuntu 12+, add the following line to `/etc/apt/sources.list`
+
+    deb http://shadowvpn.org/debian wheezy main
+
+Then
+
+    apt-get update && apt-get install shadowvpn
+    service shadowvpn restart
+
 #### Unix
 
 Currently Linux, FreeBSD and OS X are supported.
@@ -30,9 +41,7 @@ Make sure to set `--sysconfdir=/etc`. You'll find conf files under `/etc`.
 
 #### OpenWRT
 
-[Download precompiled] for OpenWRT Barrier Breaker.
-
-Or build yourself: cd into [SDK] root, then
+[Download precompiled] or build ShadowVPN yourself: cd into [SDK] root, then
 
     pushd package
     git clone https://github.com/clowwindy/ShadowVPN.git
