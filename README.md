@@ -16,20 +16,6 @@ please come by here a few months later.
 Install
 -------
 
-#### Debian & Ubuntu
-
-For Debian 7 and Ubuntu 12+, add the following line to `/etc/apt/sources.list`
-
-    deb http://shadowvpn.org/debian wheezy main
-
-Then
-
-    apt-get update
-    apt-get install shadowvpn
-    service shadowvpn restart
-
-Or see [Build deb Package].
-
 #### Unix
 
 Currently Linux, FreeBSD and OS X are supported.
@@ -56,17 +42,17 @@ Or build yourself: cd into [SDK] root, then
     scp bin/xxx/ShadowVPN-xxx-xxx.ipk root@192.168.1.1
     # then log in your box and use opkg to install that ipk file
 
-#### Windows
-
-See [Build for Windows].
-
 #### iOS
 
-Work in progress. See [iOS]
+See [iOS]
 
 #### Android
 
 See [Android]
+
+#### Windows
+
+See [Build for Windows].
 
 Configuration
 -------------
