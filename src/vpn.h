@@ -45,6 +45,7 @@ typedef struct {
 
   /* the address we currently use (client only) */
   struct sockaddr_storage remote_addr;
+  /* points to above, just for convenience */
   struct sockaddr *remote_addrp;
   socklen_t remote_addrlen;
   shadowvpn_args_t *args;

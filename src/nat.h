@@ -32,6 +32,11 @@
 
 #include "uthash.h"
 
+/**
+  This module maps any IP from the client net to the server net
+  based on user_token.
+*/
+
 /* the structure to store known client addresses for the server */
 typedef struct {
   struct sockaddr_storage addr;
@@ -70,10 +75,16 @@ typedef struct {
 /* init hash tables */
 int nat_init(nat_ctx_t *ctx, shadowvpn_args_t *args);
 
-/* UDP -> TUN NAT */
-int nat_fix_upstream(nat_ctx_t *ctx, const struct sockaddr *addr, socklen_t addrlen);
+/* UDP -> TUN NAT
+   buf starts from payload
+*/
+int nat_fix_upstream(nat_ctx_t *ctx, unsigned char *buf, const struct sockaddr *addr,
+                     socklen_t addrlen);
 
-/* TUN -> UDP NAT */
-int nat_fix_downstream(nat_ctx_t *ctx, struct sockaddr *addr, socklen_t *addrlen);
+/* TUN -> UDP NAT 
+   buf starts from payload
+*/
+int nat_fix_downstream(nat_ctx_t *ctx, unsigned char *buf, struct sockaddr *addr,
+                       socklen_t *addrlen);
 
 #endif

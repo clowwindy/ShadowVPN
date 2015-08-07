@@ -53,11 +53,13 @@ int nat_init(nat_ctx_t *ctx, shadowvpn_args_t *args) {
   return 0;
 }
 
-int nat_fix_upstream(nat_ctx_t *ctx, const struct sockaddr *addr, socklen_t addrlen) {
+int nat_fix_upstream(nat_ctx_t *ctx, unsigned char *buf, const struct sockaddr *addr,
+                     socklen_t addrlen) {
   return 0;
 }
 
-int nat_fix_downstream(nat_ctx_t *ctx, struct sockaddr *addr, socklen_t *addrlen) {
+int nat_fix_downstream(nat_ctx_t *ctx, unsigned char *buf, struct sockaddr *addr,
+                       socklen_t *addrlen) {
   return 0;
 }
 
