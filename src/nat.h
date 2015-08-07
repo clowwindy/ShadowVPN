@@ -79,13 +79,13 @@ int nat_init(nat_ctx_t *ctx, shadowvpn_args_t *args);
 /* UDP -> TUN NAT
    buf starts from payload
 */
-int nat_fix_upstream(nat_ctx_t *ctx, unsigned char *buf, const struct sockaddr *addr,
-                     socklen_t addrlen);
+int nat_fix_upstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
+                     const struct sockaddr *addr, socklen_t addrlen);
 
 /* TUN -> UDP NAT 
    buf starts from payload
 */
-int nat_fix_downstream(nat_ctx_t *ctx, unsigned char *buf, struct sockaddr *addr,
-                       socklen_t *addrlen);
+int nat_fix_downstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
+                       struct sockaddr *addr, socklen_t *addrlen);
 
 #endif

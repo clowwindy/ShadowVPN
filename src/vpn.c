@@ -496,7 +496,9 @@ int vpn_run(vpn_ctx_t *ctx) {
                  ctx->args->user_tokens[0], usertoken_len);
         } else {
           // do NAT for downstream
-          nat_fix_downstream(ctx->nat_ctx, ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
+          nat_fix_downstream(ctx->nat_ctx,
+                             ctx->tun_buf + SHADOWVPN_ZERO_BYTES + usertoken_len,
+                             r - usertoken_len,
                              ctx->remote_addrp, &ctx->remote_addrlen);
         }
       }
@@ -563,7 +565,9 @@ int vpn_run(vpn_ctx_t *ctx) {
           if (usertoken_len) {
             if (ctx->args->mode == SHADOWVPN_MODE_SERVER) {
               // do NAT for upstream
-              nat_fix_upstream(ctx->nat_ctx, ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
+              nat_fix_upstream(ctx->nat_ctx,
+                               ctx->tun_buf + SHADOWVPN_ZERO_BYTES + usertoken_len,
+                               r - SHADOWVPN_OVERHEAD_LEN - usertoken_len,
                                ctx->remote_addrp, ctx->remote_addrlen);
             }
           }
