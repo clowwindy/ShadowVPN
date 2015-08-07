@@ -498,18 +498,18 @@ int vpn_run(vpn_ctx_t *ctx) {
           // do NAT for downstream
           nat_fix_downstream(ctx->nat_ctx,
                              ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
-                             r,
+                             r + usertoken_len,
                              ctx->remote_addrp, &ctx->remote_addrlen);
         }
       }
       if (ctx->remote_addrlen) {
-        crypto_encrypt(ctx->udp_buf, ctx->tun_buf, r);
+        crypto_encrypt(ctx->udp_buf, ctx->tun_buf, r + usertoken_len);
 
         // TODO concurrency is currently removed
         int sock_to_send = ctx->socks[0];
 
         r = sendto(sock_to_send, ctx->udp_buf + SHADOWVPN_PACKET_OFFSET,
-                   SHADOWVPN_OVERHEAD_LEN + r, 0,
+                   SHADOWVPN_OVERHEAD_LEN + usertoken_len + r, 0,
                    ctx->remote_addrp, ctx->remote_addrlen);
         if (r == -1) {
           if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -533,7 +533,7 @@ int vpn_run(vpn_ctx_t *ctx) {
         struct sockaddr_storage temp_remote_addr;
         socklen_t temp_remote_addrlen = sizeof(temp_remote_addr);
         r = recvfrom(sock, ctx->udp_buf + SHADOWVPN_PACKET_OFFSET,
-                    SHADOWVPN_OVERHEAD_LEN + ctx->args->mtu, 0,
+                    SHADOWVPN_OVERHEAD_LEN + usertoken_len + ctx->args->mtu, 0,
                     (struct sockaddr *)&temp_remote_addr,
                     &temp_remote_addrlen);
         if (r == -1) {
@@ -574,9 +574,8 @@ int vpn_run(vpn_ctx_t *ctx) {
             }
           }
           if (-1 == tun_write(ctx->tun,
-                              ctx->tun_buf + SHADOWVPN_ZERO_BYTES +
-                              usertoken_len,
-                r - SHADOWVPN_OVERHEAD_LEN)) {
+                              ctx->tun_buf + SHADOWVPN_ZERO_BYTES + usertoken_len,
+                              r - SHADOWVPN_OVERHEAD_LEN - usertoken_len)) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
               // do nothing
             } else if (errno == EPERM || errno == EINTR || errno == EINVAL) {

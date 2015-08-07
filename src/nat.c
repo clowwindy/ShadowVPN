@@ -42,10 +42,7 @@ int nat_init(nat_ctx_t *ctx, shadowvpn_args_t *args) {
     memcpy(client->user_token, args->user_tokens[i], SHADOWVPN_USERTOKEN_LEN);
 
     // test only, assign 10.9.0.x
-    client->output_tun_ip[0] = 10;
-    client->output_tun_ip[1] = 9;
-    client->output_tun_ip[0] = 0;
-    client->output_tun_ip[0] = 2 + i;
+    client->output_tun_ip = htonl(0x0a090002 + i);
 
     // add to hash: ctx->token_to_clients[user_token] = client
     HASH_ADD(hh, ctx->token_to_clients, user_token, SHADOWVPN_USERTOKEN_LEN, client);
@@ -72,14 +69,43 @@ int nat_init(nat_ctx_t *ctx, shadowvpn_args_t *args) {
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 */
 
+typedef struct {
+  uint8_t ver;
+  uint8_t tos;
+  uint16_t total_len;
+  uint16_t id;
+  uint16_t frag;
+  uint8_t ttl;
+  uint8_t proto;
+  uint16_t checksum;
+  uint32_t saddr;
+  uint32_t daddr;
+} ipv4_hdr;
+
+// from OpenVPN
+#define ADJUST_CHECKSUM(acc, cksum) { \
+  int _acc = acc; \
+  _acc += (cksum); \
+  if (_acc < 0) { \
+    _acc = -_acc; \
+    _acc = (_acc >> 16) + (_acc & 0xffff); \
+    _acc += _acc >> 16; \
+    (cksum) = (uint16_t) ~_acc; \
+  } else { \
+    _acc = (_acc >> 16) + (_acc & 0xffff); \
+    _acc += _acc >> 16; \
+    (cksum) = (uint16_t) _acc; \
+  } \
+}
+
 int nat_fix_upstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
                      const struct sockaddr *addr, socklen_t addrlen) {
   if (buflen < SHADOWVPN_USERTOKEN_LEN + 20) {
     errf("nat: packet too short");
     return -1;
   }
-  unsigned char *iphdr = buf + SHADOWVPN_USERTOKEN_LEN;
-  if ((iphdr[0] & 0xf0) != 0x40) {
+  ipv4_hdr *iphdr = (ipv4_hdr *)(buf + SHADOWVPN_USERTOKEN_LEN);
+  if ((iphdr->ver & 0xf0) != 0x40) {
     // check header, currently IPv4 only
     // bypass IPv6
     return 0;
@@ -98,12 +124,17 @@ int nat_fix_upstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
   client->source_addr.addrlen =  addrlen;
   memcpy(&client->source_addr.addr, addr, addrlen);
   // old checksum
-  uint16_t old_checksum = (iphdr[10] << 8) + iphdr[11];
+  int32_t acc = 0;
   // save tun input ip to client
-  memcpy(client->input_tun_ip, iphdr + 12, 4);
+  client->input_tun_ip = iphdr->saddr;
+
   // overwrite IP
-  memcpy(iphdr + 12, client->output_tun_ip, 4);
-  // TODO update checksum
+  iphdr->saddr = client->output_tun_ip;
+
+  // add old, sub new
+  acc = client->input_tun_ip - iphdr->saddr;
+  ADJUST_CHECKSUM(acc, iphdr->checksum);
+
   return 0;
 }
 

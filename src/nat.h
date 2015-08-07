@@ -54,10 +54,10 @@ typedef struct {
 
   // input tun IP
   // TODO support IPv6 address on tun
-  char input_tun_ip[4];
+  uint32_t input_tun_ip;
 
   // output tun IP
-  char output_tun_ip[4];
+  uint32_t output_tun_ip;
 
   UT_hash_handle hh;
 } client_info_t;
