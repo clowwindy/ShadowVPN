@@ -49,6 +49,10 @@ typedef struct {
   uint16_t port;
   uint16_t mtu;
   uint16_t concurrency;
+
+  uint64_t *user_tokens;
+  size_t user_tokens_len;
+
   const char *up_script;
   const char *down_script;
 #ifdef TARGET_WIN32

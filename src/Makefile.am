@@ -22,7 +22,8 @@ libshadowvpn_la_SOURCES = log.c \
 	args.c \
 	daemon.h \
 	daemon.c \
-	shadowvpn.h
+	shadowvpn.h \
+	uthash.h
 
 if WIN32
 libshadowvpn_la_SOURCES += win32.c win32.h
