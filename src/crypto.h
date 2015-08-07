@@ -40,9 +40,15 @@ int crypto_decrypt(unsigned char *m, unsigned char *c,
 /*
    buffer layout
 
-   [SALSA20_RESERVED 8] [NONCE 8] [MAC 16] [OPTIONAL USERTOKEN 8] [PAYLOAD]
+   [SALSA20_RESERVED 8] [NONCE 8] [MAC 16] [OPTIONAL USERTOKEN 8] [PAYLOAD MTU]
 
-   UDP packet starts from:
+   Buffer total size:
+   SHADOWVPN_ZERO_BYTES + USERTOKEN + MTU
+
+   TUN reads & writes at:
+   SHADOWVPN_ZERO_BYTES + USERTOKEN
+
+   UDP packet sendto & recvfrom at:
    SHADOWVPN_PACKET_OFFSET = SALSA20_RESERVED
 
    Plain text starts from in buffer:
@@ -50,6 +56,7 @@ int crypto_decrypt(unsigned char *m, unsigned char *c,
 
    Plain text starts from in UDP packet:
    SHADOWVPN_OVERHEAD_LEN  = NONCE + MAC
+
 */
 
 #define SHADOWVPN_ZERO_BYTES 32

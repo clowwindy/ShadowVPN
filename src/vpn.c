@@ -417,6 +417,7 @@ int vpn_run(vpn_ctx_t *ctx) {
   fd_set readset;
   int max_fd = 0, i;
   ssize_t r;
+  size_t usertoken_offset = 0;
   if (ctx->running) {
     errf("can not start, already running");
     return -1;
@@ -426,8 +427,14 @@ int vpn_run(vpn_ctx_t *ctx) {
 
   shell_up(ctx->args);
 
-  ctx->tun_buf = malloc(ctx->args->mtu + SHADOWVPN_ZERO_BYTES);
-  ctx->udp_buf = malloc(ctx->args->mtu + SHADOWVPN_ZERO_BYTES);
+  if (ctx->args->user_tokens_len) {
+    usertoken_offset = SHADOWVPN_USERTOKEN_LEN;
+  }
+
+  ctx->tun_buf = malloc(ctx->args->mtu + SHADOWVPN_ZERO_BYTES +
+                        usertoken_offset);
+  ctx->udp_buf = malloc(ctx->args->mtu + SHADOWVPN_ZERO_BYTES +
+                        usertoken_offset);
   bzero(ctx->tun_buf, SHADOWVPN_ZERO_BYTES);
   bzero(ctx->udp_buf, SHADOWVPN_ZERO_BYTES);
 
@@ -472,7 +479,8 @@ int vpn_run(vpn_ctx_t *ctx) {
     }
 #endif
     if (FD_ISSET(ctx->tun, &readset)) {
-      r = tun_read(ctx->tun, ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
+      r = tun_read(ctx->tun,
+                   ctx->tun_buf + SHADOWVPN_ZERO_BYTES + usertoken_offset,
                    ctx->args->mtu);
       if (r == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -553,7 +561,9 @@ int vpn_run(vpn_ctx_t *ctx) {
             strategy_update_remote_addr_list(ctx);
           }
 
-          if (-1 == tun_write(ctx->tun, ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
+          if (-1 == tun_write(ctx->tun,
+                              ctx->tun_buf + SHADOWVPN_ZERO_BYTES +
+                              usertoken_offset,
                 r - SHADOWVPN_OVERHEAD_LEN)) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
               // do nothing
