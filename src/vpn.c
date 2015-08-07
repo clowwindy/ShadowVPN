@@ -417,7 +417,7 @@ int vpn_run(vpn_ctx_t *ctx) {
   fd_set readset;
   int max_fd = 0, i;
   ssize_t r;
-  size_t usertoken_offset = 0;
+  size_t usertoken_len = 0;
   if (ctx->running) {
     errf("can not start, already running");
     return -1;
@@ -428,13 +428,13 @@ int vpn_run(vpn_ctx_t *ctx) {
   shell_up(ctx->args);
 
   if (ctx->args->user_tokens_len) {
-    usertoken_offset = SHADOWVPN_USERTOKEN_LEN;
+    usertoken_len = SHADOWVPN_USERTOKEN_LEN;
   }
 
   ctx->tun_buf = malloc(ctx->args->mtu + SHADOWVPN_ZERO_BYTES +
-                        usertoken_offset);
+                        usertoken_len);
   ctx->udp_buf = malloc(ctx->args->mtu + SHADOWVPN_ZERO_BYTES +
-                        usertoken_offset);
+                        usertoken_len);
   bzero(ctx->tun_buf, SHADOWVPN_ZERO_BYTES);
   bzero(ctx->udp_buf, SHADOWVPN_ZERO_BYTES);
 
@@ -480,7 +480,7 @@ int vpn_run(vpn_ctx_t *ctx) {
 #endif
     if (FD_ISSET(ctx->tun, &readset)) {
       r = tun_read(ctx->tun,
-                   ctx->tun_buf + SHADOWVPN_ZERO_BYTES + usertoken_offset,
+                   ctx->tun_buf + SHADOWVPN_ZERO_BYTES + usertoken_len,
                    ctx->args->mtu);
       if (r == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -491,6 +491,14 @@ int vpn_run(vpn_ctx_t *ctx) {
         } else {
           err("read from tun");
           break;
+        }
+      }
+      if (usertoken_len) {
+        if (ctx->args->mode == SHADOWVPN_MODE_CLIENT) {
+          memcpy(ctx->udp_buf + SHADOWVPN_ZERO_BYTES,
+                 ctx->args->user_tokens[0], usertoken_len);
+        } else {
+          // TODO
         }
       }
       if (ctx->remote_addrlen) {
@@ -563,7 +571,7 @@ int vpn_run(vpn_ctx_t *ctx) {
 
           if (-1 == tun_write(ctx->tun,
                               ctx->tun_buf + SHADOWVPN_ZERO_BYTES +
-                              usertoken_offset,
+                              usertoken_len,
                 r - SHADOWVPN_OVERHEAD_LEN)) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
               // do nothing
