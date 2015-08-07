@@ -36,8 +36,25 @@ int crypto_decrypt(unsigned char *m, unsigned char *c,
                    unsigned long long clen);
 
 #define SHADOWVPN_KEY_LEN 32
+
+/*
+   buffer layout
+
+   [SALSA20_RESERVED 8] [NONCE 8] [MAC 16] [OPTIONAL USERTOKEN 8] [PAYLOAD]
+
+   UDP packet starts from:
+   SHADOWVPN_PACKET_OFFSET = SALSA20_RESERVED
+
+   Plain text starts from in buffer:
+   SHADOWVPN_ZERO_BYTES    = SALSA20_RESERVED + NONCE + MAC
+
+   Plain text starts from in UDP packet:
+   SHADOWVPN_OVERHEAD_LEN  = NONCE + MAC
+*/
+
 #define SHADOWVPN_ZERO_BYTES 32
 #define SHADOWVPN_OVERHEAD_LEN 24
 #define SHADOWVPN_PACKET_OFFSET 8
+#define SHADOWVPN_USERTOKEN_LEN 8
 
 #endif
