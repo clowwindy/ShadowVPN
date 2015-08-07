@@ -50,7 +50,7 @@ typedef struct {
   uint16_t mtu;
   uint16_t concurrency;
 
-  uint64_t *user_tokens;
+  char (*user_tokens)[8];
   size_t user_tokens_len;
 
   const char *up_script;
