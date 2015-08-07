@@ -28,12 +28,37 @@
 
 #ifndef TARGET_WIN32
 #include <sys/select.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <net/if.h>
 #endif
+
+int nat_init(nat_ctx_t *ctx, shadowvpn_args_t *args) {
+  int i;
+  for (i = 0; i < args->user_tokens_len; i++) {
+    client_info_t *client = malloc(sizeof(client_info_t));
+    bzero(client, sizeof(client_info_t));
+
+    memcpy(client->user_token, args->user_tokens[i], SHADOWVPN_USERTOKEN_LEN);
+
+    // test only, assign 10.9.0.x
+    client->output_tun_ip[0] = 10;
+    client->output_tun_ip[1] = 9;
+    client->output_tun_ip[0] = 0;
+    client->output_tun_ip[0] = 2 + i;
+
+    // add to hash: ctx->token_to_clients[user_token] = client
+    HASH_ADD(hh, ctx->token_to_clients, user_token, SHADOWVPN_USERTOKEN_LEN, client);
+  }
+  return 0;
+}
+
+int nat_fix_upstream(nat_ctx_t *ctx, const struct sockaddr *addr, socklen_t addrlen) {
+  return 0;
+}
+
+int nat_fix_downstream(nat_ctx_t *ctx, struct sockaddr *addr, socklen_t *addrlen) {
+  return 0;
+}
 
 

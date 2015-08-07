@@ -43,11 +43,14 @@ typedef struct {
   unsigned char *tun_buf;
   unsigned char *udp_buf;
 
-  /* the address we currently use */
+  /* the address we currently use (client only) */
   struct sockaddr_storage remote_addr;
   struct sockaddr *remote_addrp;
   socklen_t remote_addrlen;
   shadowvpn_args_t *args;
+
+  /* server with NAT enabled only */
+  nat_ctx_t *nat_ctx;
 } vpn_ctx_t;
 
 /* return -1 on error. no need to destroy any resource */

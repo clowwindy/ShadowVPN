@@ -39,7 +39,6 @@ typedef struct {
   time_t last_recv_time;
 } addr_info_t;
 
-
 /* the structure to store known client addresses for the server */
 typedef struct {
   char user_token[8];
@@ -56,5 +55,25 @@ typedef struct {
 
   UT_hash_handle hh;
 } client_info_t;
+
+typedef struct {
+  /* clients map
+     key: user token */
+  client_info_t *token_to_clients;
+
+  /* clients array
+     uses array because it's fast
+     index: output IP - tun IP - 1 */
+  client_info_t *ip_to_clients;
+} nat_ctx_t;
+
+/* init hash tables */
+int nat_init(nat_ctx_t *ctx, shadowvpn_args_t *args);
+
+/* UDP -> TUN NAT */
+int nat_fix_upstream(nat_ctx_t *ctx, const struct sockaddr *addr, socklen_t addrlen);
+
+/* TUN -> UDP NAT */
+int nat_fix_downstream(nat_ctx_t *ctx, struct sockaddr *addr, socklen_t *addrlen);
 
 #endif

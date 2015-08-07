@@ -429,6 +429,11 @@ int vpn_run(vpn_ctx_t *ctx) {
                         usertoken_len);
   bzero(ctx->tun_buf, SHADOWVPN_ZERO_BYTES);
   bzero(ctx->udp_buf, SHADOWVPN_ZERO_BYTES);
+  
+  if (ctx->args->mode == SHADOWVPN_MODE_SERVER && usertoken_len) {
+    ctx->nat_ctx = malloc(sizeof(nat_ctx_t));
+    nat_init(ctx->nat_ctx, ctx->args);
+  }
 
   logf("VPN started");
 
