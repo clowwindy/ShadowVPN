@@ -46,7 +46,8 @@ typedef struct {
 
 /* the structure to store known client addresses for the server */
 typedef struct {
-  char user_token[8];
+  int id;
+  char user_token[SHADOWVPN_USERTOKEN_LEN];
 
   // source address of UDP
   addr_info_t source_addr[4];
