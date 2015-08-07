@@ -50,7 +50,7 @@ typedef struct {
   char user_token[SHADOWVPN_USERTOKEN_LEN];
 
   // source address of UDP
-  addr_info_t source_addr[4];
+  addr_info_t source_addr;
 
   // input tun IP
   // TODO support IPv6 address on tun

@@ -53,8 +53,57 @@ int nat_init(nat_ctx_t *ctx, shadowvpn_args_t *args) {
   return 0;
 }
 
+/*
+   RFC791
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |Version|  IHL  |Type of Service|          Total Length         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |         Identification        |Flags|      Fragment Offset    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |  Time to Live |    Protocol   |         Header Checksum       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                       Source Address                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Destination Address                        |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Options                    |    Padding    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+*/
+
 int nat_fix_upstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
                      const struct sockaddr *addr, socklen_t addrlen) {
+  if (buflen < SHADOWVPN_USERTOKEN_LEN + 20) {
+    errf("nat: packet too short");
+    return -1;
+  }
+  unsigned char *iphdr = buf + SHADOWVPN_USERTOKEN_LEN;
+  if ((iphdr[0] & 0xf0) != 0x40) {
+    // check header, currently IPv4 only
+    // bypass IPv6
+    return 0;
+  }
+
+  print_hex_memory(buf, SHADOWVPN_USERTOKEN_LEN);
+  client_info_t *client = NULL;
+  HASH_FIND(hh, ctx->token_to_clients, buf, SHADOWVPN_USERTOKEN_LEN, client);
+  if (client == NULL) {
+    errf("nat: client not found for given user token");
+    return -1;
+  }
+  print_hex_memory(iphdr, buflen);
+
+  // save source address
+  client->source_addr.addrlen =  addrlen;
+  memcpy(&client->source_addr.addr, addr, addrlen);
+  // old checksum
+  uint16_t old_checksum = (iphdr[10] << 8) + iphdr[11];
+  // save tun input ip to client
+  memcpy(client->input_tun_ip, iphdr + 12, 4);
+  // overwrite IP
+  memcpy(iphdr + 12, client->output_tun_ip, 4);
+  // TODO update checksum
   return 0;
 }
 
