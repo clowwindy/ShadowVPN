@@ -388,12 +388,7 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
     return -1;
   }
 #endif
-  if (args->mode == SHADOWVPN_MODE_SERVER) {
-    ctx->nsock = 1;
-  } else {
-    // if we are client, we should have multiple sockets for each port
-    ctx->nsock = args->concurrency;
-  }
+  ctx->nsock = 1;
   ctx->socks = calloc(ctx->nsock, sizeof(int));
   for (i = 0; i < ctx->nsock; i++) {
     int *sock = ctx->socks + i;
@@ -405,9 +400,6 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
       close(ctx->tun);
       return -1;
     }
-  }
-  if (args->mode == SHADOWVPN_MODE_SERVER) {
-    ctx->known_addrs = calloc(args->concurrency, sizeof(addr_info_t));
   }
   ctx->args = args;
   return 0;
@@ -504,13 +496,8 @@ int vpn_run(vpn_ctx_t *ctx) {
       if (ctx->remote_addrlen) {
         crypto_encrypt(ctx->udp_buf, ctx->tun_buf, r);
 
-        // choose remote address for server
-        if (ctx->args->mode == SHADOWVPN_MODE_SERVER) {
-          strategy_choose_remote_addr(ctx);
-        }
-
-        // choose socket (currently only for client)
-        int sock_to_send = strategy_choose_socket(ctx);
+        // TODO concurrency is currently removed
+        int sock_to_send = ctx->socks[0];
 
         r = sendto(sock_to_send, ctx->udp_buf + SHADOWVPN_PACKET_OFFSET,
                    SHADOWVPN_OVERHEAD_LEN + r, 0,
@@ -565,8 +552,6 @@ int vpn_run(vpn_ctx_t *ctx) {
             // recv_from
             memcpy(ctx->remote_addrp, &temp_remote_addr, temp_remote_addrlen);
             ctx->remote_addrlen = temp_remote_addrlen;
-            // now we got one client address, update the address list
-            strategy_update_remote_addr_list(ctx);
           }
 
           if (-1 == tun_write(ctx->tun,

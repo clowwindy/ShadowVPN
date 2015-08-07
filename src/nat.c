@@ -1,5 +1,5 @@
 /**
-  strategy.h
+  vpn.c
 
   Copyright (C) 2015 clowwindy
 
@@ -18,21 +18,22 @@
 
 */
 
-#ifndef STRATEGY_H
-#define STRATEGY_H
+#include "shadowvpn.h"
 
-#include "vpn.h"
+#include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
 
-// choose a socket by random
-// return chosen socket
-int strategy_choose_socket(vpn_ctx_t *ctx);
-
-// choose a reasonable remote address based on magic
-// update ctx->remote_addr and remote_addrlen
-// return 0 on success
-int strategy_choose_remote_addr(vpn_ctx_t *ctx);
-
-// update remote address list from remote_addr and remote_addrlen
-void strategy_update_remote_addr_list(vpn_ctx_t *ctx);
-
+#ifndef TARGET_WIN32
+#include <sys/select.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <net/if.h>
 #endif
+
+
