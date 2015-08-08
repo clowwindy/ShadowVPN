@@ -45,8 +45,8 @@ int nat_init(nat_ctx_t *ctx, shadowvpn_args_t *args) {
 
     // assign IP based on tun IP and user tokens
     // for example:
-    //     tun IP is 10.8.0.1
-    //     client IPs will be 10.8.0.2, 10.8.0.3, 10.8.0.4, etc
+    //     tun IP is 10.7.0.1
+    //     client IPs will be 10.7.0.2, 10.7.0.3, 10.7.0.4, etc
     client->output_tun_ip = htonl(args->netip + i + 1);
 
     struct in_addr in;
