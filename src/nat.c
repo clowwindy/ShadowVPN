@@ -134,19 +134,19 @@ int nat_fix_upstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
   }
   iphdr_len = (iphdr->ver & 0x0f) * 4;
 
-  print_hex_memory(buf, SHADOWVPN_USERTOKEN_LEN);
+  // print_hex_memory(buf, SHADOWVPN_USERTOKEN_LEN);
   client_info_t *client = NULL;
   HASH_FIND(hh1, ctx->token_to_clients, buf, SHADOWVPN_USERTOKEN_LEN, client);
   if (client == NULL) {
     errf("nat: client not found for given user token");
     return -1;
   }
-  print_hex_memory(iphdr, buflen - SHADOWVPN_USERTOKEN_LEN);
+  // print_hex_memory(iphdr, buflen - SHADOWVPN_USERTOKEN_LEN);
 
   // save source address
   client->source_addr.addrlen =  addrlen;
   memcpy(&client->source_addr.addr, addr, addrlen);
-  // old checksum
+
   int32_t acc = 0;
   // save tun input ip to client
   client->input_tun_ip = iphdr->saddr;
@@ -194,28 +194,24 @@ int nat_fix_downstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
   }
   iphdr_len = (iphdr->ver & 0x0f) * 4;
 
-  print_hex_memory(buf, SHADOWVPN_USERTOKEN_LEN);
+  // print_hex_memory(buf, SHADOWVPN_USERTOKEN_LEN);
   client_info_t *client = NULL;
-  HASH_FIND(hh2, ctx->token_to_clients, buf, SHADOWVPN_USERTOKEN_LEN, client);
+  // print_hex_memory(iphdr, buflen - SHADOWVPN_USERTOKEN_LEN);
+
+  HASH_FIND(hh2, ctx->ip_to_clients, &iphdr->daddr, 4, client);
   if (client == NULL) {
-    errf("nat: client not found for given user token");
+    errf("nat: client not found for given user ip");
     return -1;
   }
-  print_hex_memory(iphdr, buflen - SHADOWVPN_USERTOKEN_LEN);
 
-  // save source address
-  client->source_addr.addrlen =  addrlen;
-  memcpy(&client->source_addr.addr, addr, addrlen);
-  // old checksum
   int32_t acc = 0;
-  // save tun input ip to client
-  client->input_tun_ip = iphdr->saddr;
-
-  // overwrite IP
-  iphdr->saddr = client->output_tun_ip;
 
   // add old, sub new
-  acc = client->input_tun_ip - iphdr->saddr;
+  acc = iphdr->daddr - client->input_tun_ip;
+
+  // overwrite IP
+  iphdr->daddr = client->input_tun_ip;
+
   ADJUST_CHECKSUM(acc, iphdr->checksum);
 
   void *ip_payload = buf + SHADOWVPN_USERTOKEN_LEN + iphdr_len;
