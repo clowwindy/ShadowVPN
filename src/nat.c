@@ -34,8 +34,9 @@
 #endif
 
 int nat_init(nat_ctx_t *ctx, shadowvpn_args_t *args) {
+  int i;
   bzero(ctx, sizeof(nat_ctx_t));
-  for (int i = 0; i < args->user_tokens_len; i++) {
+  for (i = 0; i < args->user_tokens_len; i++) {
     client_info_t *client = malloc(sizeof(client_info_t));
     bzero(client, sizeof(client_info_t));
 
