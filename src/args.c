@@ -179,6 +179,8 @@ static int process_key_value(shadowvpn_args_t *args, const char *key,
   } else if (strcmp("port", key) == 0) {
     args->port = atol(value);
   } else if (strcmp("concurrency", key) == 0) {
+    errf("warning: concurrency is temporarily disabled on this version, "
+         "make sure to set concurrency=1 on the other side");
     args->concurrency = atol(value);
     if (args->concurrency == 0) {
       errf("concurrency should >= 1");
