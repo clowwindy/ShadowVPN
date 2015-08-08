@@ -43,6 +43,10 @@ int nat_init(nat_ctx_t *ctx, shadowvpn_args_t *args) {
 
     memcpy(client->user_token, args->user_tokens[i], SHADOWVPN_USERTOKEN_LEN);
 
+    // assign IP based on tun IP and user tokens
+    // for example:
+    //     tun IP is 10.8.0.1
+    //     client IPs will be 10.8.0.2, 10.8.0.3, 10.8.0.4, etc
     client->output_tun_ip = htonl(args->netip + i + 1);
 
     struct in_addr in;
@@ -111,6 +115,8 @@ typedef struct {
 } udp_hdr_t;
 
 // from OpenVPN
+// acc is the changes (+ old - new)
+// cksum is the checksum to adjust
 #define ADJUST_CHECKSUM(acc, cksum) { \
   int _acc = acc; \
   _acc += (cksum); \
@@ -199,7 +205,6 @@ int nat_fix_downstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
   }
   iphdr_len = (iphdr->ver & 0x0f) * 4;
 
-  // print_hex_memory(buf, SHADOWVPN_USERTOKEN_LEN);
   client_info_t *client = NULL;
   // print_hex_memory(iphdr, buflen - SHADOWVPN_USERTOKEN_LEN);
 
@@ -208,6 +213,12 @@ int nat_fix_downstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
     errf("nat: client not found for given user ip");
     return -1;
   }
+
+  // print_hex_memory(client->user_token, SHADOWVPN_USERTOKEN_LEN);
+
+  // update dest address
+  *addrlen = client->source_addr.addrlen;
+  memcpy(addr, &client->source_addr.addr, *addrlen);
 
   int32_t acc = 0;
 
