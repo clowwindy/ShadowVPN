@@ -30,7 +30,7 @@
 #include "args.h"
 #include "daemon.h"
 #include "shell.h"
+#include "nat.h"
 #include "vpn.h"
-#include "strategy.h"
 
 #endif

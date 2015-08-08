@@ -388,12 +388,7 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
     return -1;
   }
 #endif
-  if (args->mode == SHADOWVPN_MODE_SERVER) {
-    ctx->nsock = 1;
-  } else {
-    // if we are client, we should have multiple sockets for each port
-    ctx->nsock = args->concurrency;
-  }
+  ctx->nsock = 1;
   ctx->socks = calloc(ctx->nsock, sizeof(int));
   for (i = 0; i < ctx->nsock; i++) {
     int *sock = ctx->socks + i;
@@ -406,9 +401,6 @@ int vpn_ctx_init(vpn_ctx_t *ctx, shadowvpn_args_t *args) {
       return -1;
     }
   }
-  if (args->mode == SHADOWVPN_MODE_SERVER) {
-    ctx->known_addrs = calloc(args->concurrency, sizeof(addr_info_t));
-  }
   ctx->args = args;
   return 0;
 }
@@ -417,6 +409,7 @@ int vpn_run(vpn_ctx_t *ctx) {
   fd_set readset;
   int max_fd = 0, i;
   ssize_t r;
+  size_t usertoken_len = 0;
   if (ctx->running) {
     errf("can not start, already running");
     return -1;
@@ -426,10 +419,21 @@ int vpn_run(vpn_ctx_t *ctx) {
 
   shell_up(ctx->args);
 
-  ctx->tun_buf = malloc(ctx->args->mtu + SHADOWVPN_ZERO_BYTES);
-  ctx->udp_buf = malloc(ctx->args->mtu + SHADOWVPN_ZERO_BYTES);
+  if (ctx->args->user_tokens_len) {
+    usertoken_len = SHADOWVPN_USERTOKEN_LEN;
+  }
+
+  ctx->tun_buf = malloc(ctx->args->mtu + SHADOWVPN_ZERO_BYTES +
+                        usertoken_len);
+  ctx->udp_buf = malloc(ctx->args->mtu + SHADOWVPN_ZERO_BYTES +
+                        usertoken_len);
   bzero(ctx->tun_buf, SHADOWVPN_ZERO_BYTES);
   bzero(ctx->udp_buf, SHADOWVPN_ZERO_BYTES);
+  
+  if (ctx->args->mode == SHADOWVPN_MODE_SERVER && usertoken_len) {
+    ctx->nat_ctx = malloc(sizeof(nat_ctx_t));
+    nat_init(ctx->nat_ctx, ctx->args);
+  }
 
   logf("VPN started");
 
@@ -472,7 +476,8 @@ int vpn_run(vpn_ctx_t *ctx) {
     }
 #endif
     if (FD_ISSET(ctx->tun, &readset)) {
-      r = tun_read(ctx->tun, ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
+      r = tun_read(ctx->tun,
+                   ctx->tun_buf + SHADOWVPN_ZERO_BYTES + usertoken_len,
                    ctx->args->mtu);
       if (r == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -485,19 +490,26 @@ int vpn_run(vpn_ctx_t *ctx) {
           break;
         }
       }
-      if (ctx->remote_addrlen) {
-        crypto_encrypt(ctx->udp_buf, ctx->tun_buf, r);
-
-        // choose remote address for server
-        if (ctx->args->mode == SHADOWVPN_MODE_SERVER) {
-          strategy_choose_remote_addr(ctx);
+      if (usertoken_len) {
+        if (ctx->args->mode == SHADOWVPN_MODE_CLIENT) {
+          memcpy(ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
+                 ctx->args->user_tokens[0], usertoken_len);
+        } else {
+          // do NAT for downstream
+          nat_fix_downstream(ctx->nat_ctx,
+                             ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
+                             r + usertoken_len,
+                             ctx->remote_addrp, &ctx->remote_addrlen);
         }
+      }
+      if (ctx->remote_addrlen) {
+        crypto_encrypt(ctx->udp_buf, ctx->tun_buf, r + usertoken_len);
 
-        // choose socket (currently only for client)
-        int sock_to_send = strategy_choose_socket(ctx);
+        // TODO concurrency is currently removed
+        int sock_to_send = ctx->socks[0];
 
         r = sendto(sock_to_send, ctx->udp_buf + SHADOWVPN_PACKET_OFFSET,
-                   SHADOWVPN_OVERHEAD_LEN + r, 0,
+                   SHADOWVPN_OVERHEAD_LEN + usertoken_len + r, 0,
                    ctx->remote_addrp, ctx->remote_addrlen);
         if (r == -1) {
           if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -521,7 +533,7 @@ int vpn_run(vpn_ctx_t *ctx) {
         struct sockaddr_storage temp_remote_addr;
         socklen_t temp_remote_addrlen = sizeof(temp_remote_addr);
         r = recvfrom(sock, ctx->udp_buf + SHADOWVPN_PACKET_OFFSET,
-                    SHADOWVPN_OVERHEAD_LEN + ctx->args->mtu, 0,
+                    SHADOWVPN_OVERHEAD_LEN + usertoken_len + ctx->args->mtu, 0,
                     (struct sockaddr *)&temp_remote_addr,
                     &temp_remote_addrlen);
         if (r == -1) {
@@ -549,12 +561,21 @@ int vpn_run(vpn_ctx_t *ctx) {
             // recv_from
             memcpy(ctx->remote_addrp, &temp_remote_addr, temp_remote_addrlen);
             ctx->remote_addrlen = temp_remote_addrlen;
-            // now we got one client address, update the address list
-            strategy_update_remote_addr_list(ctx);
           }
-
-          if (-1 == tun_write(ctx->tun, ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
-                r - SHADOWVPN_OVERHEAD_LEN)) {
+          if (usertoken_len) {
+            if (ctx->args->mode == SHADOWVPN_MODE_SERVER) {
+              // do NAT for upstream
+              if (-1 == nat_fix_upstream(ctx->nat_ctx,
+                                         ctx->tun_buf + SHADOWVPN_ZERO_BYTES,
+                                         r - SHADOWVPN_OVERHEAD_LEN,
+                                         ctx->remote_addrp, ctx->remote_addrlen)) {
+                continue;
+              }
+            }
+          }
+          if (-1 == tun_write(ctx->tun,
+                              ctx->tun_buf + SHADOWVPN_ZERO_BYTES + usertoken_len,
+                              r - SHADOWVPN_OVERHEAD_LEN - usertoken_len)) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
               // do nothing
             } else if (errno == EPERM || errno == EINTR || errno == EINVAL) {

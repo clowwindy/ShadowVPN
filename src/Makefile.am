@@ -14,15 +14,16 @@ libshadowvpn_la_SOURCES = log.c \
 	crypto.c \
 	shell.h \
 	shell.c \
-	strategy.h \
-	strategy.c \
+	nat.h \
+	nat.c \
 	vpn.h \
 	vpn.c \
 	args.h \
 	args.c \
 	daemon.h \
 	daemon.c \
-	shadowvpn.h
+	shadowvpn.h \
+	uthash.h
 
 if WIN32
 libshadowvpn_la_SOURCES += win32.c win32.h

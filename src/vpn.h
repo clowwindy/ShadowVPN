@@ -23,22 +23,8 @@
 
 #include <time.h>
 
-#ifdef TARGET_WIN32
-#include "win32.h"
-#else
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#endif
 #include "args.h"
-
-/* the structure to store known client addresses for the server */
-typedef struct {
-  struct sockaddr_storage addr;
-  socklen_t addrlen;
-  time_t last_recv_time;
-} addr_info_t;
+#include "nat.h"
 
 typedef struct {
   int running;
@@ -57,15 +43,15 @@ typedef struct {
   unsigned char *tun_buf;
   unsigned char *udp_buf;
 
-  /* known client addrs for the server */
-  int nknown_addr;
-  addr_info_t *known_addrs;
-
-  /* the address we currently use */
+  /* the address we currently use (client only) */
   struct sockaddr_storage remote_addr;
+  /* points to above, just for convenience */
   struct sockaddr *remote_addrp;
   socklen_t remote_addrlen;
   shadowvpn_args_t *args;
+
+  /* server with NAT enabled only */
+  nat_ctx_t *nat_ctx;
 } vpn_ctx_t;
 
 /* return -1 on error. no need to destroy any resource */
