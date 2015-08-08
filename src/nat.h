@@ -59,7 +59,8 @@ typedef struct {
   // output tun IP
   uint32_t output_tun_ip;
 
-  UT_hash_handle hh;
+  UT_hash_handle hh1;
+  UT_hash_handle hh2;
 } client_info_t;
 
 typedef struct {
@@ -67,9 +68,8 @@ typedef struct {
      key: user token */
   client_info_t *token_to_clients;
 
-  /* clients array
-     uses array because it's fast
-     index: output IP - tun IP - 1 */
+  /* clients map
+     key: IP */
   client_info_t *ip_to_clients;
 } nat_ctx_t;
 
