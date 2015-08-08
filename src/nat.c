@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
-#include <endian.h>
+#include "portable_endian.h"
 
 #ifndef TARGET_WIN32
 #include <sys/select.h>

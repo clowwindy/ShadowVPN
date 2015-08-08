@@ -23,7 +23,8 @@ libshadowvpn_la_SOURCES = log.c \
 	daemon.h \
 	daemon.c \
 	shadowvpn.h \
-	uthash.h
+	uthash.h \
+	portable_endian.h
 
 if WIN32
 libshadowvpn_la_SOURCES += win32.c win32.h
