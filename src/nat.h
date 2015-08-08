@@ -53,10 +53,12 @@ typedef struct {
   addr_info_t source_addr;
 
   // input tun IP
+  // in network order
   // TODO support IPv6 address on tun
   uint32_t input_tun_ip;
 
   // output tun IP
+  // in network order
   uint32_t output_tun_ip;
 
   UT_hash_handle hh1;
@@ -69,6 +71,7 @@ typedef struct {
   client_info_t *token_to_clients;
 
   /* clients map
+     TODO: use index instead of hash
      key: IP */
   client_info_t *ip_to_clients;
 } nat_ctx_t;

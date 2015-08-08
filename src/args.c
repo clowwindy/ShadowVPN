@@ -22,6 +22,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <getopt.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include "shadowvpn.h"
 
 static const char *help_message =
@@ -188,6 +192,14 @@ static int process_key_value(shadowvpn_args_t *args, const char *key,
     args->password = strdup(value);
   } else if (strcmp("user_token", key) == 0) {
     parse_user_tokens(args, strdup(value));
+  } else if (strcmp("net", key) == 0) {
+    char *p = strchr(value, '/');
+    if (p) *p = 0;
+    in_addr_t addr = inet_addr(value);
+    if (addr == INADDR_NONE) {
+      errf("warning: invalid net IP in config file: %s", value);
+    }
+    args->netip = ntohl((uint32_t)addr);
   } else if (strcmp("mode", key) == 0) {
     if (strcmp("server", value) == 0) {
       args->mode = SHADOWVPN_MODE_SERVER;

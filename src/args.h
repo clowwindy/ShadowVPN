@@ -50,6 +50,9 @@ typedef struct {
   uint16_t mtu;
   uint16_t concurrency;
 
+  // the ip of the "net" configuration
+  // in host order
+  uint32_t netip;
   char (*user_tokens)[8];
   size_t user_tokens_len;
 

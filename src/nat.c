@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <endian.h>
 
 #ifndef TARGET_WIN32
 #include <sys/select.h>
@@ -42,11 +43,17 @@ int nat_init(nat_ctx_t *ctx, shadowvpn_args_t *args) {
 
     memcpy(client->user_token, args->user_tokens[i], SHADOWVPN_USERTOKEN_LEN);
 
-    // test only, assign 10.9.0.x
-    client->output_tun_ip = htonl(0x0a090002 + i);
+    client->output_tun_ip = htonl(args->netip + i + 1);
+
+    struct in_addr in;
+    in.s_addr = client->output_tun_ip;
+    logf("assigning %s to user %16llx",
+         inet_ntoa(in),
+         htobe64(*((uint64_t *)args->user_tokens[i])));
 
     // add to hash: ctx->token_to_clients[user_token] = client
-    HASH_ADD(hh1, ctx->token_to_clients, user_token, SHADOWVPN_USERTOKEN_LEN, client);
+    HASH_ADD(hh1, ctx->token_to_clients, user_token,
+             SHADOWVPN_USERTOKEN_LEN, client);
 
     // add to hash: ctx->ip_to_clients[output_tun_ip] = client
     HASH_ADD(hh2, ctx->ip_to_clients, output_tun_ip, 4, client);
@@ -160,7 +167,6 @@ int nat_fix_upstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
 
   void *ip_payload = buf + SHADOWVPN_USERTOKEN_LEN + iphdr_len;
   if (iphdr->proto == IPPROTO_TCP) {
-    errf("adjusting tcp");
     if (buflen < iphdr_len + 20) {
       errf("nat: tcp packet too short");
       return -1;
@@ -168,7 +174,6 @@ int nat_fix_upstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
     tcp_hdr_t *tcphdr = ip_payload;
     ADJUST_CHECKSUM(acc, tcphdr->checksum);
   } else if (iphdr->proto == IPPROTO_UDP) {
-    errf("adjusting udp");
     if (buflen < iphdr_len + 8) {
       errf("nat: udp packet too short");
       return -1;
@@ -216,7 +221,6 @@ int nat_fix_downstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
 
   void *ip_payload = buf + SHADOWVPN_USERTOKEN_LEN + iphdr_len;
   if (iphdr->proto == IPPROTO_TCP) {
-    errf("adjusting tcp");
     if (buflen < iphdr_len + 20) {
       errf("nat: tcp packet too short");
       return -1;
@@ -224,7 +228,6 @@ int nat_fix_downstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
     tcp_hdr_t *tcphdr = ip_payload;
     ADJUST_CHECKSUM(acc, tcphdr->checksum);
   } else if (iphdr->proto == IPPROTO_UDP) {
-    errf("adjusting udp");
     if (buflen < iphdr_len + 8) {
       errf("nat: udp packet too short");
       return -1;
