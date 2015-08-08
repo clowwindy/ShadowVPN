@@ -1,3 +1,9 @@
+shadowvpn (0.1.7-1) unstable; urgency=low
+
+  * Update configurations
+
+ -- clowwindy <clowwindy42@gmail.com>  Sat, 08 Aug 2015 16:24:00 +0800
+
 shadowvpn (0.1.6-1) unstable; urgency=low
 
   * Call setsid and ignore SIGHUP in daemon mode
