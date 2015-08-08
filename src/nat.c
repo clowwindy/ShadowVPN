@@ -219,6 +219,9 @@ int nat_fix_downstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
   // update dest address
   *addrlen = client->source_addr.addrlen;
   memcpy(addr, &client->source_addr.addr, *addrlen);
+  
+  // copy usertoken back
+  memcpy(buf, client->user_token, SHADOWVPN_USERTOKEN_LEN);
 
   int32_t acc = 0;
 
