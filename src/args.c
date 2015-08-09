@@ -23,13 +23,14 @@
 #include <string.h>
 #include <getopt.h>
 
+#include "shadowvpn.h"
+
 #ifndef TARGET_WIN32
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #endif
 
-#include "shadowvpn.h"
 
 static const char *help_message =
 "usage: shadowvpn -c config_file [-s start/stop/restart] [-v]\n"
