@@ -41,7 +41,6 @@
 typedef struct {
   struct sockaddr_storage addr;
   socklen_t addrlen;
-  time_t last_recv_time;
 } addr_info_t;
 
 /* the structure to store known client addresses for the server */
