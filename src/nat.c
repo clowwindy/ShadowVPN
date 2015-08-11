@@ -171,21 +171,24 @@ int nat_fix_upstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
   acc = client->input_tun_ip - iphdr->saddr;
   ADJUST_CHECKSUM(acc, iphdr->checksum);
 
-  void *ip_payload = buf + SHADOWVPN_USERTOKEN_LEN + iphdr_len;
-  if (iphdr->proto == IPPROTO_TCP) {
-    if (buflen < iphdr_len + 20) {
-      errf("nat: tcp packet too short");
-      return -1;
+  if (0 == (iphdr->frag & htons(0x1fff))) {
+    // only adjust tcp & udp when frag offset == 0
+    void *ip_payload = buf + SHADOWVPN_USERTOKEN_LEN + iphdr_len;
+    if (iphdr->proto == IPPROTO_TCP) {
+      if (buflen < iphdr_len + 20) {
+        errf("nat: tcp packet too short");
+        return -1;
+      }
+      tcp_hdr_t *tcphdr = ip_payload;
+      ADJUST_CHECKSUM(acc, tcphdr->checksum);
+    } else if (iphdr->proto == IPPROTO_UDP) {
+      if (buflen < iphdr_len + 8) {
+        errf("nat: udp packet too short");
+        return -1;
+      }
+      udp_hdr_t *udphdr = ip_payload;
+      ADJUST_CHECKSUM(acc, udphdr->checksum);
     }
-    tcp_hdr_t *tcphdr = ip_payload;
-    ADJUST_CHECKSUM(acc, tcphdr->checksum);
-  } else if (iphdr->proto == IPPROTO_UDP) {
-    if (buflen < iphdr_len + 8) {
-      errf("nat: udp packet too short");
-      return -1;
-    }
-    udp_hdr_t *udphdr = ip_payload;
-    ADJUST_CHECKSUM(acc, udphdr->checksum);
   }
   return 0;
 }
@@ -233,21 +236,24 @@ int nat_fix_downstream(nat_ctx_t *ctx, unsigned char *buf, size_t buflen,
 
   ADJUST_CHECKSUM(acc, iphdr->checksum);
 
-  void *ip_payload = buf + SHADOWVPN_USERTOKEN_LEN + iphdr_len;
-  if (iphdr->proto == IPPROTO_TCP) {
-    if (buflen < iphdr_len + 20) {
-      errf("nat: tcp packet too short");
-      return -1;
+  if (0 == (iphdr->frag & htons(0x1fff))) {
+    // only adjust tcp & udp when frag offset == 0
+    void *ip_payload = buf + SHADOWVPN_USERTOKEN_LEN + iphdr_len;
+    if (iphdr->proto == IPPROTO_TCP) {
+      if (buflen < iphdr_len + 20) {
+        errf("nat: tcp packet too short");
+        return -1;
+      }
+      tcp_hdr_t *tcphdr = ip_payload;
+      ADJUST_CHECKSUM(acc, tcphdr->checksum);
+    } else if (iphdr->proto == IPPROTO_UDP) {
+      if (buflen < iphdr_len + 8) {
+        errf("nat: udp packet too short");
+        return -1;
+      }
+      udp_hdr_t *udphdr = ip_payload;
+      ADJUST_CHECKSUM(acc, udphdr->checksum);
     }
-    tcp_hdr_t *tcphdr = ip_payload;
-    ADJUST_CHECKSUM(acc, tcphdr->checksum);
-  } else if (iphdr->proto == IPPROTO_UDP) {
-    if (buflen < iphdr_len + 8) {
-      errf("nat: udp packet too short");
-      return -1;
-    }
-    udp_hdr_t *udphdr = ip_payload;
-    ADJUST_CHECKSUM(acc, udphdr->checksum);
   }
   return 0;
 }
