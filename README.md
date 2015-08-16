@@ -41,7 +41,9 @@ Make sure to set `--sysconfdir=/etc`. You'll find conf files under `/etc`.
 
 #### OpenWRT
 
-[Download precompiled] or build ShadowVPN yourself: cd into [SDK] root, then
+Download bundled [ShadowVPN with LuCI], or just [download precompiled],
+
+Or build ShadowVPN yourself: cd into [SDK] root, then
 
     pushd package
     git clone https://github.com/clowwindy/ShadowVPN.git
@@ -139,7 +141,7 @@ Bugs and Issues
 [Build for Windows]:    https://github.com/clowwindy/ShadowVPN/wiki/Build-for-Windows
 [Compare]:              https://github.com/clowwindy/ShadowVPN/wiki/Compared-to-Shadowsocks-and-OpenVPN
 [Chinese Readme]:       https://github.com/clowwindy/ShadowVPN/wiki/ShadowVPN-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
-[Download precompiled]: https://github.com/clowwindy/ShadowVPN/releases
+[download precompiled]: https://github.com/clowwindy/ShadowVPN/releases
 [FAQ]:                  https://github.com/clowwindy/ShadowVPN/wiki/FAQ
 [iOS]:                  https://github.com/clowwindy/ShadowVPNiOS
 [Issue Tracker]:        https://github.com/clowwindy/ShadowVPN/issues?state=open
@@ -147,4 +149,5 @@ Bugs and Issues
 [Mailing list]:         http://groups.google.com/group/shadowsocks
 [release]:              https://github.com/clowwindy/ShadowVPN/releases
 [SDK]:                  http://wiki.openwrt.org/doc/howto/obtain.firmware.sdk
+[ShadowVPN with LuCI]:  https://github.com/aa65535/openwrt-shadowvpn
 [Travis CI]:            https://travis-ci.org/clowwindy/ShadowVPN
