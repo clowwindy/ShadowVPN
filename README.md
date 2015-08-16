@@ -41,7 +41,7 @@ Make sure to set `--sysconfdir=/etc`. You'll find conf files under `/etc`.
 
 #### OpenWRT
 
-Download bundled [ShadowVPN with LuCI], or just [download precompiled],
+Download bundled [ShadowVPN with LuCI], or just [download ShadowVPN] itself,
 
 Or build ShadowVPN yourself: cd into [SDK] root, then
 
@@ -141,7 +141,7 @@ Bugs and Issues
 [Build for Windows]:    https://github.com/clowwindy/ShadowVPN/wiki/Build-for-Windows
 [Compare]:              https://github.com/clowwindy/ShadowVPN/wiki/Compared-to-Shadowsocks-and-OpenVPN
 [Chinese Readme]:       https://github.com/clowwindy/ShadowVPN/wiki/ShadowVPN-%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E
-[download precompiled]: https://github.com/clowwindy/ShadowVPN/releases
+[download ShadowVPN]:   https://github.com/clowwindy/ShadowVPN/releases
 [FAQ]:                  https://github.com/clowwindy/ShadowVPN/wiki/FAQ
 [iOS]:                  https://github.com/clowwindy/ShadowVPNiOS
 [Issue Tracker]:        https://github.com/clowwindy/ShadowVPN/issues?state=open
