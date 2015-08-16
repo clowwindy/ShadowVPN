@@ -76,6 +76,7 @@ Configuration
 placeholder at the end of those scripts.
 - If you are using Windows, the IP address of TUN/TAP device `tunip` is
 required to be specified in the conf file.
+- You can [configure multiple users](https://github.com/clowwindy/ShadowVPN/wiki/Configure-Multiple-Users)
 
 
 Usage
