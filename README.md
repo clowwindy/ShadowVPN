@@ -77,11 +77,6 @@ placeholder at the end of those scripts.
 - If you are using Windows, the IP address of TUN/TAP device `tunip` is
 required to be specified in the conf file.
 
-Notice ShadowVPN is a peer-to-peer VPN, which means you'll have one server
-for one client. If you have multiple clients, you should start multiple server
-instances, which can be controlled by different configuration files via `-c`
-argument. Make sure to use different IP for each instance in each `up` and
-`down` scripts.
 
 Usage
 -----
