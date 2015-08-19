@@ -18,7 +18,7 @@ iptables -I FORWARD 1 -i $intf -m state --state RELATED,ESTABLISHED -j ACCEPT
 iptables -I FORWARD 1 -o $intf -j ACCEPT
 
 # Direct route to VPN server's public IP via current gateway
-ip route add $server via $(ip route show 0/0 | sed -e 's/.* via \([^ ]*\).*/\1/')
+ip route add $server via $(ip route show 0/0 | sort -k 7 | head -n 1 | sed -e 's/.* via \([^ ]*\).*/\1/')
 
 # Shadow default route using two /1 subnets
 ip route add   0/1 dev $intf
